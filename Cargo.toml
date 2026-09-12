@@ -1,5 +1,5 @@
 [workspace]
-members = ["plugins/oha", "plugins/popeye", "plugins/resource-summary", "plugins/trivy"]
+members = ["plugins/chaos-kill", "plugins/oha", "plugins/popeye", "plugins/resource-summary", "plugins/trivy"]
 resolver = "3"
 
 [workspace.package]
