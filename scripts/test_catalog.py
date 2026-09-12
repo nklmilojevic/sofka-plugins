@@ -285,6 +285,7 @@ def check_selection() -> None:
             "plugins/resource-summary/src/main.rs\n": ["resource-summary"],
             "plugins/resource-summary/README.md\n": ["resource-summary"],
             "plugins/popeye/plugin.toml\n": ["popeye"],
+            "plugins/trivy/plugin.toml\n": ["trivy"],
             ".github/workflows/ci.yaml\n": every,
             "scripts/catalog.py\n": every,
             "Cargo.lock\n": every,

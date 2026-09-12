@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "sections": [
+    {
+      "columns": [
+        "Field",
+        "Value"
+      ],
+      "rows": [
+        [
+          "Findings",
+          "9"
+        ],
+        [
+          "Critical",
+          "1"
+        ],
+        [
+          "High",
+          "3"
+        ],
+        [
+          "Medium",
+          "1"
+        ],
+        [
+          "Low",
+          "3"
+        ],
+        [
+          "Vulnerabilities",
+          "6"
+        ],
+        [
+          "Misconfigurations",
+          "3"
+        ],
+        [
+          "Secrets",
+          "0"
+        ],
+        [
+          "Context",
+          "docker-desktop"
+        ],
+        [
+          "Cluster",
+          "docker-desktop"
+        ],
+        [
+          "Namespace",
+          "all"
+        ],
+        [
+          "Resources",
+          "3"
+        ],
+        [
+          "Scan errors",
+          "1"
+        ]
+      ],
+      "title": "Summary"
+    },
+    {
+      "lines": [
+        "0 vulnerabilities · 3 misconfigurations · 0 secrets · C 0 H 1 M 1 L 1 U 0",
+        "  [misconfiguration] MEDIUM KSV-0001 — Can elevate its own privileges",
+        "  [misconfiguration] LOW KSV-0003 — Default capabilities: some containers do not drop all",
+        "  [misconfiguration] HIGH KSV-0014 — Root file system is not read-only"
+      ],
+      "title": "traefik · Deployment/traefik"
+    },
+    {
+      "lines": [
+        "6 vulnerabilities · 0 misconfigurations · 0 secrets · C 1 H 2 M 0 L 2 U 1",
+        "  [vulnerability] HIGH CVE-2026-14456 · libcrypto3@3.5.7-r0 → 3.5.8-r0 — openssl: OpenSSL: Denial of Service via unbounded memory growth in QUIC server",
+        "  [vulnerability] LOW CVE-2026-14457 · libcrypto3@3.5.7-r0 → 3.5.8-r0 — openssl: RPK server signature algorithm selection can dereference a missing certificate",
+        "  [vulnerability] HIGH CVE-2026-14456 · libssl3@3.5.7-r0 → 3.5.8-r0 — openssl: OpenSSL: Denial of Service via unbounded memory growth in QUIC server",
+        "  [vulnerability] LOW CVE-2026-14457 · libssl3@3.5.7-r0 → 3.5.8-r0 — openssl: RPK server signature algorithm selection can dereference a missing certificate",
+        "  [vulnerability] CRITICAL CVE-2026-88007 · github.com/traefik/traefik/v3@v3.7.12 → 3.7.13 — Traefik HTTP/3 Backend NTLM Connection Reuse",
+        "  [vulnerability] UNKNOWN GO-2026-5932 · golang.org/x/crypto@v0.55.0 — The golang.org/x/crypto/openpgp package is unmaintained, unsafe by design, and has known security issues"
+      ],
+      "title": "traefik · Deployment/traefik"
+    },
+    {
+      "lines": [
+        "0 vulnerabilities · 0 misconfigurations · 0 secrets · C 0 H 0 M 0 L 0 U 0",
+        "  ERROR scan error: scan failed: failed analysis: analyze error: pipeline error: failed to analyze layer (sha256:d57ab43be2c98934f2fa548b6be4ea1d06d9b87d6c9c17a0a6550800475aaa6f): unable to get uncompressed layer sha256:d57ab43be2c98934f2fa548b6be4ea1d06d9b87d6c9c17a0a6550800475aaa6f: failed to get the layer (sha256:d57ab43be2c98934f2fa548b6be4ea1d06d9b87d6c9c17a0a6550800475aaa6f): unable to populate: unable to open: failed to initialize the struct from the temporary file: file blobs/sha256/fe81a497e85f174f8d7d5739d14f5184141f4e80596977ff8f838d7062fecf02 not found in tar"
+      ],
+      "title": "kube-system · Deployment/coredns"
+    }
+  ],
+  "title": "Trivy scan"
+}

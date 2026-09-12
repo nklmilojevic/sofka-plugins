@@ -1,0 +1,1344 @@
+{
+  "ClusterName": "docker-desktop",
+  "Resources": [
+    {
+      "Namespace": "traefik",
+      "Kind": "Deployment",
+      "Name": "traefik",
+      "Metadata": [
+        {}
+      ],
+      "Results": [
+        {
+          "Target": "Deployment/traefik",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 103,
+            "Failures": 13
+          },
+          "Misconfigurations": [
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV-0001",
+              "Title": "Can elevate its own privileges",
+              "Description": "A program inside the container can elevate its own privileges and run as root, which might give the program control over the container and node.",
+              "Message": "Container 'traefik' of Deployment 'traefik' should set 'securityContext.allowPrivilegeEscalation' to false",
+              "Namespace": "builtin.kubernetes.KSV001",
+              "Query": "data.builtin.kubernetes.KSV001.deny",
+              "Resolution": "Set 'set containers[].securityContext.allowPrivilegeEscalation' to 'false'.",
+              "Severity": "MEDIUM",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv-0001",
+              "References": [
+                "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+                "https://avd.aquasec.com/misconfig/ksv-0001"
+              ],
+              "Status": "FAIL",
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 37,
+                "EndLine": 81,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 37,
+                      "Content": "                - args:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33margs\u001b[0m:",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 38,
+                      "Content": "                    - --entrypoints.web.address=:80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --entrypoints.web.address=:80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 39,
+                      "Content": "                    - --providers.kubernetesgateway=true",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --providers.kubernetesgateway=true",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 40,
+                      "Content": "                    - --providers.kubernetesgateway.experimentalchannel=false",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --providers.kubernetesgateway.experimentalchannel=false",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 41,
+                      "Content": "                    - --api.insecure=true",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --api.insecure=true",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 42,
+                      "Content": "                    - --api.dashboard=false",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --api.dashboard=false",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 43,
+                      "Content": "                    - --api.debug=true",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --api.debug=true",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 44,
+                      "Content": "                    - --ping=true",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --ping=true",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 45,
+                      "Content": "                    - --log.level=ERROR",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --log.level=ERROR",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 46,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV-0003",
+              "Title": "Default capabilities: some containers do not drop all",
+              "Description": "The container should drop all default capabilities and add only those that are needed for its execution.",
+              "Message": "Container 'traefik' of Deployment 'traefik' should add 'ALL' to 'securityContext.capabilities.drop'",
+              "Namespace": "builtin.kubernetes.KSV003",
+              "Query": "data.builtin.kubernetes.KSV003.deny",
+              "Resolution": "Add 'ALL' to containers[].securityContext.capabilities.drop.",
+              "Severity": "LOW",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv-0003",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-capabilities-drop-index-all/",
+                "https://avd.aquasec.com/misconfig/ksv-0003"
+              ],
+              "Status": "FAIL",
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 37,
+                "EndLine": 81,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 37,
+                      "Content": "                - args:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33margs\u001b[0m:",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 38,
+                      "Content": "                    - --entrypoints.web.address=:80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --entrypoints.web.address=:80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 39,
+                      "Content": "                    - --providers.kubernetesgateway=true",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --providers.kubernetesgateway=true",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 40,
+                      "Content": "                    - --providers.kubernetesgateway.experimentalchannel=false",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --providers.kubernetesgateway.experimentalchannel=false",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 41,
+                      "Content": "                    - --api.insecure=true",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --api.insecure=true",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 42,
+                      "Content": "                    - --api.dashboard=false",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --api.dashboard=false",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 43,
+                      "Content": "                    - --api.debug=true",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --api.debug=true",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 44,
+                      "Content": "                    - --ping=true",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --ping=true",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 45,
+                      "Content": "                    - --log.level=ERROR",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --log.level=ERROR",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 46,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Type": "Kubernetes Security Check",
+              "ID": "KSV-0014",
+              "Title": "Root file system is not read-only",
+              "Description": "An immutable root file system prevents applications from writing to their local disk. This can limit intrusions, as attackers will not be able to tamper with the file system or write foreign executables to disk.",
+              "Message": "Container 'traefik' of Deployment 'traefik' should set 'securityContext.readOnlyRootFilesystem' to true",
+              "Namespace": "builtin.kubernetes.KSV014",
+              "Query": "data.builtin.kubernetes.KSV014.deny",
+              "Resolution": "Change 'containers[].securityContext.readOnlyRootFilesystem' to 'true'.",
+              "Severity": "HIGH",
+              "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv-0014",
+              "References": [
+                "https://kubesec.io/basics/containers-securitycontext-readonlyrootfilesystem-true/",
+                "https://avd.aquasec.com/misconfig/ksv-0014"
+              ],
+              "Status": "FAIL",
+              "CauseMetadata": {
+                "Provider": "Kubernetes",
+                "Service": "general",
+                "StartLine": 37,
+                "EndLine": 81,
+                "Code": {
+                  "Lines": [
+                    {
+                      "Number": 37,
+                      "Content": "                - args:",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                - \u001b[38;5;33margs\u001b[0m:",
+                      "FirstCause": true,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 38,
+                      "Content": "                    - --entrypoints.web.address=:80",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --entrypoints.web.address=:80",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 39,
+                      "Content": "                    - --providers.kubernetesgateway=true",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --providers.kubernetesgateway=true",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 40,
+                      "Content": "                    - --providers.kubernetesgateway.experimentalchannel=false",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --providers.kubernetesgateway.experimentalchannel=false",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 41,
+                      "Content": "                    - --api.insecure=true",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --api.insecure=true",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 42,
+                      "Content": "                    - --api.dashboard=false",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --api.dashboard=false",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 43,
+                      "Content": "                    - --api.debug=true",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --api.debug=true",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 44,
+                      "Content": "                    - --ping=true",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --ping=true",
+                      "FirstCause": false,
+                      "LastCause": false
+                    },
+                    {
+                      "Number": 45,
+                      "Content": "                    - --log.level=ERROR",
+                      "IsCause": true,
+                      "Annotation": "",
+                      "Truncated": false,
+                      "Highlighted": "                    - --log.level=ERROR",
+                      "FirstCause": false,
+                      "LastCause": true
+                    },
+                    {
+                      "Number": 46,
+                      "Content": "",
+                      "IsCause": false,
+                      "Annotation": "",
+                      "Truncated": true,
+                      "FirstCause": false,
+                      "LastCause": false
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "traefik",
+      "Kind": "Deployment",
+      "Name": "traefik",
+      "Metadata": [
+        {
+          "Size": 178229760,
+          "OS": {
+            "Family": "alpine",
+            "Name": "3.24.1"
+          },
+          "ImageID": "sha256:5447d0eaf375d832b8f224f88db0e80c0a2d44554fc973e3ba72c3a52946cfcc",
+          "DiffIDs": [
+            "sha256:b2848c02ac6ff53d265469b5b30f649f335e546a83330cd8916d54e65e640409",
+            "sha256:e6bd77cb0074019b8ef91211c1d961f4ba441b2c371651634a672107d0704a0f",
+            "sha256:84e7412d7560bc960f3a9f52c6f623ec4ea88c806665635a84e681feae41184f",
+            "sha256:25ed235fbb414f03b656b3d8eef2aac655654e520b71c4cb0baa1a1f7dece503"
+          ],
+          "RepoTags": [
+            "traefik:v3.7.12"
+          ],
+          "RepoDigests": [
+            "traefik@sha256:5447d0eaf375d832b8f224f88db0e80c0a2d44554fc973e3ba72c3a52946cfcc"
+          ],
+          "Reference": "traefik:v3.7.12",
+          "ImageConfig": {
+            "architecture": "arm64",
+            "created": "2026-08-26T17:37:57.59557033Z",
+            "history": [
+              {
+                "created": "2026-06-16T00:01:20Z",
+                "created_by": "ADD alpine-minirootfs-3.24.1-aarch64.tar.gz / # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+              },
+              {
+                "created": "2026-06-16T00:01:20Z",
+                "created_by": "CMD [\"/bin/sh\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+              },
+              {
+                "created": "2026-08-26T17:37:55Z",
+                "created_by": "RUN /bin/sh -c apk --no-cache add ca-certificates tzdata # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+              },
+              {
+                "created": "2026-08-26T17:37:57Z",
+                "created_by": "RUN /bin/sh -c set -ex; \tapkArch=\"$(apk --print-arch)\"; \tcase \"$apkArch\" in \t\tarmhf) arch='armv6' ;;         armv7) arch='armv7' ;; \t\taarch64) arch='arm64' ;; \t\tx86_64) arch='amd64' ;; \t\triscv64) arch='riscv64' ;; \t\ts390x) arch='s390x' ;; \t\tppc64le) arch='ppc64le' ;; \t\t*) echo >&2 \"error: unsupported architecture: $apkArch\"; exit 1 ;; \tesac; \twget --quiet -O /tmp/traefik.tar.gz \"https://github.com/traefik/traefik/releases/download/v3.7.12/traefik_v3.7.12_linux_$arch.tar.gz\"; \ttar xzvf /tmp/traefik.tar.gz -C /usr/local/bin traefik; \trm -f /tmp/traefik.tar.gz; \tchmod +x /usr/local/bin/traefik # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+              },
+              {
+                "created": "2026-08-26T17:37:57Z",
+                "created_by": "COPY entrypoint.sh / # buildkit",
+                "comment": "buildkit.dockerfile.v0"
+              },
+              {
+                "created": "2026-08-26T17:37:57Z",
+                "created_by": "EXPOSE map[80/tcp:{}]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+              },
+              {
+                "created": "2026-08-26T17:37:57Z",
+                "created_by": "ENTRYPOINT [\"/entrypoint.sh\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+              },
+              {
+                "created": "2026-08-26T17:37:57Z",
+                "created_by": "CMD [\"traefik\"]",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+              },
+              {
+                "created": "2026-08-26T17:37:57Z",
+                "created_by": "LABEL org.opencontainers.image.vendor=Traefik Labs org.opencontainers.image.url=https://traefik.io org.opencontainers.image.source=https://github.com/traefik/traefik org.opencontainers.image.title=Traefik org.opencontainers.image.description=A modern reverse-proxy org.opencontainers.image.version=v3.7.12 org.opencontainers.image.documentation=https://docs.traefik.io",
+                "comment": "buildkit.dockerfile.v0",
+                "empty_layer": true
+              }
+            ],
+            "os": "linux",
+            "rootfs": {
+              "type": "layers",
+              "diff_ids": [
+                "sha256:b2848c02ac6ff53d265469b5b30f649f335e546a83330cd8916d54e65e640409",
+                "sha256:e6bd77cb0074019b8ef91211c1d961f4ba441b2c371651634a672107d0704a0f",
+                "sha256:84e7412d7560bc960f3a9f52c6f623ec4ea88c806665635a84e681feae41184f",
+                "sha256:25ed235fbb414f03b656b3d8eef2aac655654e520b71c4cb0baa1a1f7dece503"
+              ]
+            },
+            "config": {
+              "Cmd": [
+                "traefik"
+              ],
+              "Entrypoint": [
+                "/entrypoint.sh"
+              ],
+              "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+              ],
+              "Labels": {
+                "org.opencontainers.image.description": "A modern reverse-proxy",
+                "org.opencontainers.image.documentation": "https://docs.traefik.io",
+                "org.opencontainers.image.source": "https://github.com/traefik/traefik",
+                "org.opencontainers.image.title": "Traefik",
+                "org.opencontainers.image.url": "https://traefik.io",
+                "org.opencontainers.image.vendor": "Traefik Labs",
+                "org.opencontainers.image.version": "v3.7.12"
+              },
+              "WorkingDir": "/",
+              "ExposedPorts": {
+                "80/tcp": {}
+              }
+            }
+          },
+          "Layers": [
+            {
+              "Size": 8939520,
+              "Digest": "sha256:5de55e5ef9c033997441461efe7ba23a986db059c0bb78b38f84ee0d72b99167",
+              "DiffID": "sha256:b2848c02ac6ff53d265469b5b30f649f335e546a83330cd8916d54e65e640409"
+            },
+            {
+              "Size": 1643520,
+              "Digest": "sha256:7f1a6b6f433081ac0511189f498162f8970364e9cc0f8f8ddeab6f529880d95b",
+              "DiffID": "sha256:e6bd77cb0074019b8ef91211c1d961f4ba441b2c371651634a672107d0704a0f"
+            },
+            {
+              "Size": 167644672,
+              "Digest": "sha256:b8872d6907f274fec46cae619a8a573cc541fbf64f952a84d6285a1a073a462a",
+              "DiffID": "sha256:84e7412d7560bc960f3a9f52c6f623ec4ea88c806665635a84e681feae41184f"
+            },
+            {
+              "Size": 2048,
+              "Digest": "sha256:deb4eb531134f8fa9fc9a3fd8838411e0a4a8755e8ff1804e2a1308076692d91",
+              "DiffID": "sha256:25ed235fbb414f03b656b3d8eef2aac655654e520b71c4cb0baa1a1f7dece503"
+            }
+          ]
+        }
+      ],
+      "Results": [
+        {
+          "Target": "traefik:v3.7.12 (alpine 3.24.1)",
+          "Class": "os-pkgs",
+          "Type": "alpine",
+          "Packages": [
+            {
+              "ID": "libcrypto3@3.5.7-r0",
+              "Name": "libcrypto3",
+              "Identifier": {
+                "PURL": "pkg:apk/alpine/libcrypto3@3.5.7-r0?arch=aarch64&distro=3.24.1",
+                "UID": "e225a839d04a50b0"
+              },
+              "Version": "3.5.7-r0",
+              "Arch": "aarch64",
+              "SrcName": "openssl",
+              "SrcVersion": "3.5.7-r0",
+              "Licenses": [
+                "Apache-2.0"
+              ],
+              "Maintainer": "Natanael Copa <ncopa@alpinelinux.org>",
+              "DependsOn": [
+                "musl@1.2.6-r2"
+              ],
+              "Layer": {
+                "Digest": "sha256:5de55e5ef9c033997441461efe7ba23a986db059c0bb78b38f84ee0d72b99167",
+                "DiffID": "sha256:b2848c02ac6ff53d265469b5b30f649f335e546a83330cd8916d54e65e640409"
+              },
+              "Digest": "sha1:07e5bf5ac2def91677bafca6a18b6c251e80f53a",
+              "InstalledFiles": [
+                "etc/ssl/ct_log_list.cnf",
+                "etc/ssl/ct_log_list.cnf.dist",
+                "etc/ssl/openssl.cnf",
+                "etc/ssl/openssl.cnf.dist",
+                "usr/lib/libcrypto.so.3",
+                "usr/lib/engines-3/afalg.so",
+                "usr/lib/engines-3/capi.so",
+                "usr/lib/engines-3/loader_attic.so",
+                "usr/lib/engines-3/padlock.so",
+                "usr/lib/ossl-modules/legacy.so"
+              ],
+              "AnalyzedBy": "apk"
+            },
+            {
+              "ID": "libssl3@3.5.7-r0",
+              "Name": "libssl3",
+              "Identifier": {
+                "PURL": "pkg:apk/alpine/libssl3@3.5.7-r0?arch=aarch64&distro=3.24.1",
+                "UID": "8a271e1ab19ca7f"
+              },
+              "Version": "3.5.7-r0",
+              "Arch": "aarch64",
+              "SrcName": "openssl",
+              "SrcVersion": "3.5.7-r0",
+              "Licenses": [
+                "Apache-2.0"
+              ],
+              "Maintainer": "Natanael Copa <ncopa@alpinelinux.org>",
+              "DependsOn": [
+                "libcrypto3@3.5.7-r0",
+                "musl@1.2.6-r2"
+              ],
+              "Layer": {
+                "Digest": "sha256:5de55e5ef9c033997441461efe7ba23a986db059c0bb78b38f84ee0d72b99167",
+                "DiffID": "sha256:b2848c02ac6ff53d265469b5b30f649f335e546a83330cd8916d54e65e640409"
+              },
+              "Digest": "sha1:3e15a5ee682d3e466b2dc0b02803a5f52ef235f0",
+              "InstalledFiles": [
+                "usr/lib/libssl.so.3"
+              ],
+              "AnalyzedBy": "apk"
+            }
+          ],
+          "Vulnerabilities": [
+            {
+              "VulnerabilityID": "CVE-2026-14456",
+              "PkgID": "libcrypto3@3.5.7-r0",
+              "PkgName": "libcrypto3",
+              "PkgIdentifier": {
+                "PURL": "pkg:apk/alpine/libcrypto3@3.5.7-r0?arch=aarch64&distro=3.24.1",
+                "UID": "e225a839d04a50b0"
+              },
+              "InstalledVersion": "3.5.7-r0",
+              "FixedVersion": "3.5.8-r0",
+              "Status": "fixed",
+              "Layer": {
+                "Digest": "sha256:5de55e5ef9c033997441461efe7ba23a986db059c0bb78b38f84ee0d72b99167",
+                "DiffID": "sha256:b2848c02ac6ff53d265469b5b30f649f335e546a83330cd8916d54e65e640409"
+              },
+              "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-14456",
+              "DataSource": {
+                "ID": "alpine",
+                "Name": "Alpine Secdb",
+                "URL": "https://secdb.alpinelinux.org/"
+              },
+              "Fingerprint": "sha256:157e378646851f909c815aa91588b8df84e97f8c0a0298741c4954fdb2f257f5",
+              "Title": "openssl: OpenSSL: Denial of Service via unbounded memory growth in QUIC server",
+              "Description": "Issue summary: When an OpenSSL QUIC server (Listener SSL object) processes\nvalid QUIC Initial packets for unknown destination connection IDs, it\ncan allocate and queue new incoming channels without enforcing any limit.\n\nImpact summary: A remote peer that can make many Initial packets reach the\nserver listener faster than the application accepts connections, can cause the\nmemory allocated to store the per-channel state to grow without any limits,\npotentially making the QUIC listener unavailable and causing Denial of Service.\n\nCWE: CWE-770: Allocation of Resources Without Limits or Throttling\n\nDescription: The function that handles inbound QUIC packets uses\nConnection-Id from the packet header to find an existing connection\n(QUIC channel). If no existing connection is found and the packet\ntype is INITIAL, the function treats the packet as a new connection. It\nallocates a new channel object and inserts it into a queue where it\nwaits to be accepted by the local application with SSL_accept(3ossl).\nThe memory occupied by these initial channel objects may grow\nwithout bounds if the application is not able to call SSL_accept()\nfrequently enough to serve these inbound connection requests.\n\nThe issue is present since OpenSSL 3.5 when the QUIC server implementation\nwas added.\n\nThe fix introduces a limit for pending connections. The default limit is set\nto 256 pending connections (waiting to be accepted by the local application).\nApplications may change the default by calling SSL_set_value_uint(3ossl).\n\nFIPS impact: no\nThe FIPS module is not affected as the QUIC implementation is outside of\nthe OpenSSL FIPS module boundary.",
+              "Severity": "HIGH",
+              "CweIDs": [
+                "CWE-770"
+              ],
+              "VendorSeverity": {
+                "amazon": 3,
+                "photon": 3,
+                "redhat": 3,
+                "ubuntu": 2
+              },
+              "CVSS": {
+                "redhat": {
+                  "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                  "V3Score": 7.5
+                }
+              },
+              "References": [
+                "http://www.openwall.com/lists/oss-security/2026/08/13/4",
+                "https://access.redhat.com/security/cve/CVE-2026-14456",
+                "https://github.com/openssl/openssl/commit/08e7756c3900bcfd77a720e7b74e27d6e4ed01a9",
+                "https://github.com/openssl/openssl/commit/4084152e040329ca0194c4c1750b9b46d00a5b6b",
+                "https://github.com/openssl/openssl/commit/f2f1465f2d2e5c61dfeac4d20fd093797d821139",
+                "https://nvd.nist.gov/vuln/detail/CVE-2026-14456",
+                "https://openssl-library.org/news/secadv/20260813.txt",
+                "https://ubuntu.com/security/notices/USN-8678-1",
+                "https://www.cve.org/CVERecord?id=CVE-2026-14456"
+              ],
+              "PublishedDate": "2026-08-13T15:19:31.82Z",
+              "LastModifiedDate": "2026-08-28T19:46:29.323Z"
+            },
+            {
+              "VulnerabilityID": "CVE-2026-14457",
+              "PkgID": "libcrypto3@3.5.7-r0",
+              "PkgName": "libcrypto3",
+              "PkgIdentifier": {
+                "PURL": "pkg:apk/alpine/libcrypto3@3.5.7-r0?arch=aarch64&distro=3.24.1",
+                "UID": "e225a839d04a50b0"
+              },
+              "InstalledVersion": "3.5.7-r0",
+              "FixedVersion": "3.5.8-r0",
+              "Status": "fixed",
+              "Layer": {
+                "Digest": "sha256:5de55e5ef9c033997441461efe7ba23a986db059c0bb78b38f84ee0d72b99167",
+                "DiffID": "sha256:b2848c02ac6ff53d265469b5b30f649f335e546a83330cd8916d54e65e640409"
+              },
+              "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-14457",
+              "DataSource": {
+                "ID": "alpine",
+                "Name": "Alpine Secdb",
+                "URL": "https://secdb.alpinelinux.org/"
+              },
+              "Fingerprint": "sha256:2c72780cc5d6226a3738c62492ba609676987550e6e14a611369738386529e82",
+              "Title": "openssl: RPK server signature algorithm selection can dereference a missing certificate",
+              "Description": "Issue summary: In a server or client configuration with RFC7250 Raw Public Keys (RPKs)\nenabled, and only the private key (with no associated certificate) configured locally,\na NULL pointer dereference may occur when the remote peer solicits raw public keys and\nalso sends the typically omitted \"signature_algorithms_cert\" TLS extension.\n\nImpact summary: The impact is limited to a possible Denial of Service as a result of\nan application abort, no data disclosure or remote command execution are possible.\n\nCWE: CWE-476: NULL Pointer Dereference\n\nDescription: While a passing comment in sample code in the documentation suggests\nthat key-only RPK configurations are supported, the best-practice RPK configuration\nis to always configure a corresponding certificate (possibly self-signed or\nsigned by any convenient CA).\n\nWhen the private key is configured along with a matching certificate, the\n\"signature_algorithms_cert\" extension is handled reliably even without the\nfix, and peer clients or servers that don't support raw public keys may be\nable to complete a TLS connection by pinning or verifying the corresponding\ncertificate or its public key.\n\nDeployments that prefer to configure just a private key with no certificate\nneed to upgrade to an updated release as noted below.\n\nFIPS impact: no\n\nNo FIPS modules are affected by this issue, as the SSL protocol implementation\nis outside the OpenSSL FIPS module boundary.",
+              "Severity": "LOW",
+              "CweIDs": [
+                "CWE-476"
+              ],
+              "VendorSeverity": {
+                "redhat": 1,
+                "ubuntu": 1
+              },
+              "CVSS": {
+                "redhat": {
+                  "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                  "V3Score": 7.5
+                }
+              },
+              "References": [
+                "https://access.redhat.com/security/cve/CVE-2026-14457",
+                "https://github.com/openssl/openssl/commit/1e8c398db67404babd3e5af999bb6bd86f720c76",
+                "https://github.com/openssl/openssl/commit/581aaa0f0a35d214740f0fe1f5283ec41f1212e1",
+                "https://github.com/openssl/openssl/commit/d0af20478688a6aa2f59d61caa3f82136b181d7f",
+                "https://github.com/openssl/openssl/commit/dad836b071da6579510c968615848ba03cac593b",
+                "https://nvd.nist.gov/vuln/detail/CVE-2026-14457",
+                "https://openssl-library.org/news/secadv/20260825.txt",
+                "https://ubuntu.com/security/notices/USN-8678-1",
+                "https://www.cve.org/CVERecord?id=CVE-2026-14457"
+              ],
+              "PublishedDate": "2026-08-25T13:17:49.533Z",
+              "LastModifiedDate": "2026-09-11T21:14:35.873Z"
+            },
+            {
+              "VulnerabilityID": "CVE-2026-14456",
+              "PkgID": "libssl3@3.5.7-r0",
+              "PkgName": "libssl3",
+              "PkgIdentifier": {
+                "PURL": "pkg:apk/alpine/libssl3@3.5.7-r0?arch=aarch64&distro=3.24.1",
+                "UID": "8a271e1ab19ca7f"
+              },
+              "InstalledVersion": "3.5.7-r0",
+              "FixedVersion": "3.5.8-r0",
+              "Status": "fixed",
+              "Layer": {
+                "Digest": "sha256:5de55e5ef9c033997441461efe7ba23a986db059c0bb78b38f84ee0d72b99167",
+                "DiffID": "sha256:b2848c02ac6ff53d265469b5b30f649f335e546a83330cd8916d54e65e640409"
+              },
+              "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-14456",
+              "DataSource": {
+                "ID": "alpine",
+                "Name": "Alpine Secdb",
+                "URL": "https://secdb.alpinelinux.org/"
+              },
+              "Fingerprint": "sha256:f04bcad819ba052c2d76c31125e561f0d99f35049f53eaa1ecd990ea55ee0371",
+              "Title": "openssl: OpenSSL: Denial of Service via unbounded memory growth in QUIC server",
+              "Description": "Issue summary: When an OpenSSL QUIC server (Listener SSL object) processes\nvalid QUIC Initial packets for unknown destination connection IDs, it\ncan allocate and queue new incoming channels without enforcing any limit.\n\nImpact summary: A remote peer that can make many Initial packets reach the\nserver listener faster than the application accepts connections, can cause the\nmemory allocated to store the per-channel state to grow without any limits,\npotentially making the QUIC listener unavailable and causing Denial of Service.\n\nCWE: CWE-770: Allocation of Resources Without Limits or Throttling\n\nDescription: The function that handles inbound QUIC packets uses\nConnection-Id from the packet header to find an existing connection\n(QUIC channel). If no existing connection is found and the packet\ntype is INITIAL, the function treats the packet as a new connection. It\nallocates a new channel object and inserts it into a queue where it\nwaits to be accepted by the local application with SSL_accept(3ossl).\nThe memory occupied by these initial channel objects may grow\nwithout bounds if the application is not able to call SSL_accept()\nfrequently enough to serve these inbound connection requests.\n\nThe issue is present since OpenSSL 3.5 when the QUIC server implementation\nwas added.\n\nThe fix introduces a limit for pending connections. The default limit is set\nto 256 pending connections (waiting to be accepted by the local application).\nApplications may change the default by calling SSL_set_value_uint(3ossl).\n\nFIPS impact: no\nThe FIPS module is not affected as the QUIC implementation is outside of\nthe OpenSSL FIPS module boundary.",
+              "Severity": "HIGH",
+              "CweIDs": [
+                "CWE-770"
+              ],
+              "VendorSeverity": {
+                "amazon": 3,
+                "photon": 3,
+                "redhat": 3,
+                "ubuntu": 2
+              },
+              "CVSS": {
+                "redhat": {
+                  "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                  "V3Score": 7.5
+                }
+              },
+              "References": [
+                "http://www.openwall.com/lists/oss-security/2026/08/13/4",
+                "https://access.redhat.com/security/cve/CVE-2026-14456",
+                "https://github.com/openssl/openssl/commit/08e7756c3900bcfd77a720e7b74e27d6e4ed01a9",
+                "https://github.com/openssl/openssl/commit/4084152e040329ca0194c4c1750b9b46d00a5b6b",
+                "https://github.com/openssl/openssl/commit/f2f1465f2d2e5c61dfeac4d20fd093797d821139",
+                "https://nvd.nist.gov/vuln/detail/CVE-2026-14456",
+                "https://openssl-library.org/news/secadv/20260813.txt",
+                "https://ubuntu.com/security/notices/USN-8678-1",
+                "https://www.cve.org/CVERecord?id=CVE-2026-14456"
+              ],
+              "PublishedDate": "2026-08-13T15:19:31.82Z",
+              "LastModifiedDate": "2026-08-28T19:46:29.323Z"
+            },
+            {
+              "VulnerabilityID": "CVE-2026-14457",
+              "PkgID": "libssl3@3.5.7-r0",
+              "PkgName": "libssl3",
+              "PkgIdentifier": {
+                "PURL": "pkg:apk/alpine/libssl3@3.5.7-r0?arch=aarch64&distro=3.24.1",
+                "UID": "8a271e1ab19ca7f"
+              },
+              "InstalledVersion": "3.5.7-r0",
+              "FixedVersion": "3.5.8-r0",
+              "Status": "fixed",
+              "Layer": {
+                "Digest": "sha256:5de55e5ef9c033997441461efe7ba23a986db059c0bb78b38f84ee0d72b99167",
+                "DiffID": "sha256:b2848c02ac6ff53d265469b5b30f649f335e546a83330cd8916d54e65e640409"
+              },
+              "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-14457",
+              "DataSource": {
+                "ID": "alpine",
+                "Name": "Alpine Secdb",
+                "URL": "https://secdb.alpinelinux.org/"
+              },
+              "Fingerprint": "sha256:5a5871c221eadc11f76d248573f16186697807dc7f35a42d132d4ae5393dab41",
+              "Title": "openssl: RPK server signature algorithm selection can dereference a missing certificate",
+              "Description": "Issue summary: In a server or client configuration with RFC7250 Raw Public Keys (RPKs)\nenabled, and only the private key (with no associated certificate) configured locally,\na NULL pointer dereference may occur when the remote peer solicits raw public keys and\nalso sends the typically omitted \"signature_algorithms_cert\" TLS extension.\n\nImpact summary: The impact is limited to a possible Denial of Service as a result of\nan application abort, no data disclosure or remote command execution are possible.\n\nCWE: CWE-476: NULL Pointer Dereference\n\nDescription: While a passing comment in sample code in the documentation suggests\nthat key-only RPK configurations are supported, the best-practice RPK configuration\nis to always configure a corresponding certificate (possibly self-signed or\nsigned by any convenient CA).\n\nWhen the private key is configured along with a matching certificate, the\n\"signature_algorithms_cert\" extension is handled reliably even without the\nfix, and peer clients or servers that don't support raw public keys may be\nable to complete a TLS connection by pinning or verifying the corresponding\ncertificate or its public key.\n\nDeployments that prefer to configure just a private key with no certificate\nneed to upgrade to an updated release as noted below.\n\nFIPS impact: no\n\nNo FIPS modules are affected by this issue, as the SSL protocol implementation\nis outside the OpenSSL FIPS module boundary.",
+              "Severity": "LOW",
+              "CweIDs": [
+                "CWE-476"
+              ],
+              "VendorSeverity": {
+                "redhat": 1,
+                "ubuntu": 1
+              },
+              "CVSS": {
+                "redhat": {
+                  "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                  "V3Score": 7.5
+                }
+              },
+              "References": [
+                "https://access.redhat.com/security/cve/CVE-2026-14457",
+                "https://github.com/openssl/openssl/commit/1e8c398db67404babd3e5af999bb6bd86f720c76",
+                "https://github.com/openssl/openssl/commit/581aaa0f0a35d214740f0fe1f5283ec41f1212e1",
+                "https://github.com/openssl/openssl/commit/d0af20478688a6aa2f59d61caa3f82136b181d7f",
+                "https://github.com/openssl/openssl/commit/dad836b071da6579510c968615848ba03cac593b",
+                "https://nvd.nist.gov/vuln/detail/CVE-2026-14457",
+                "https://openssl-library.org/news/secadv/20260825.txt",
+                "https://ubuntu.com/security/notices/USN-8678-1",
+                "https://www.cve.org/CVERecord?id=CVE-2026-14457"
+              ],
+              "PublishedDate": "2026-08-25T13:17:49.533Z",
+              "LastModifiedDate": "2026-09-11T21:14:35.873Z"
+            }
+          ]
+        },
+        {
+          "Target": "usr/local/bin/traefik",
+          "Class": "lang-pkgs",
+          "Type": "gobinary",
+          "Packages": [
+            {
+              "ID": "github.com/traefik/traefik/v3@v3.7.12",
+              "Name": "github.com/traefik/traefik/v3",
+              "Identifier": {
+                "PURL": "pkg:golang/github.com/traefik/traefik/v3@v3.7.12",
+                "UID": "2ee5d3110322e200"
+              },
+              "Version": "v3.7.12",
+              "Relationship": "root",
+              "DependsOn": [
+                "./pkg/config/dynamic/ext",
+                "cloud.google.com/go/auth/oauth2adapt@v0.2.8",
+                "cloud.google.com/go/auth@v0.20.0",
+                "cloud.google.com/go/compute/metadata@v0.9.0",
+                "github.com/AdamSLevy/jsonrpc2/v14@v14.1.0",
+                "github.com/Azure/azure-sdk-for-go/sdk/azcore@v1.22.0",
+                "github.com/Azure/azure-sdk-for-go/sdk/azidentity@v1.14.0",
+                "github.com/Azure/azure-sdk-for-go/sdk/internal@v1.12.0",
+                "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dns/armdns@v1.2.0",
+                "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/privatedns/armprivatedns@v1.3.0",
+                "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph@v0.10.0",
+                "github.com/AzureAD/microsoft-authentication-library-for-go@v1.7.2",
+                "github.com/BurntSushi/toml@v1.6.0",
+                "github.com/HdrHistogram/hdrhistogram-go@v1.2.0",
+                "github.com/Masterminds/goutils@v1.1.1",
+                "github.com/Masterminds/semver/v3@v3.4.0",
+                "github.com/Masterminds/sprig/v3@v3.2.3",
+                "github.com/VividCortex/gohistogram@v1.0.0",
+                "github.com/akamai/AkamaiOPEN-edgegrid-golang/v13@v13.3.0",
+                "github.com/alibabacloud-go/alibabacloud-gateway-spi@v0.0.5",
+                "github.com/alibabacloud-go/darabonba-openapi/v2@v2.2.3",
+                "github.com/alibabacloud-go/debug@v1.0.1",
+                "github.com/alibabacloud-go/tea-utils/v2@v2.0.9",
+                "github.com/alibabacloud-go/tea@v1.5.2",
+                "github.com/aliyun/credentials-go@v1.4.7",
+                "github.com/andybalholm/brotli@v1.2.2",
+                "github.com/armon/go-metrics@v0.4.1",
+                "github.com/aws/aws-sdk-go-v2/config@v1.32.30",
+                "github.com/aws/aws-sdk-go-v2/credentials@v1.19.29",
+                "github.com/aws/aws-sdk-go-v2/feature/ec2/imds@v1.18.30",
+                "github.com/aws/aws-sdk-go-v2/internal/configsources@v1.4.30",
+                "github.com/aws/aws-sdk-go-v2/internal/endpoints/v2@v2.7.30",
+                "github.com/aws/aws-sdk-go-v2/internal/v4a@v1.4.31",
+                "github.com/aws/aws-sdk-go-v2/service/ec2@v1.203.1",
+                "github.com/aws/aws-sdk-go-v2/service/ecs@v1.53.15",
+                "github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding@v1.13.13",
+                "github.com/aws/aws-sdk-go-v2/service/internal/presigned-url@v1.13.30",
+                "github.com/aws/aws-sdk-go-v2/service/lightsail@v1.57.1",
+                "github.com/aws/aws-sdk-go-v2/service/route53@v1.64.1",
+                "github.com/aws/aws-sdk-go-v2/service/signin@v1.4.1",
+                "github.com/aws/aws-sdk-go-v2/service/ssm@v1.56.13",
+                "github.com/aws/aws-sdk-go-v2/service/sso@v1.32.1",
+                "github.com/aws/aws-sdk-go-v2/service/ssooidc@v1.37.1",
+                "github.com/aws/aws-sdk-go-v2/service/sts@v1.44.1",
+                "github.com/aws/aws-sdk-go-v2@v1.42.1",
+                "github.com/aws/smithy-go@v1.27.3",
+                "github.com/aziontech/azionapi-go-sdk@v0.147.0",
+                "github.com/baidubce/bce-sdk-go@v0.9.270",
+                "github.com/benbjohnson/clock@v1.3.5",
+                "github.com/beorn7/perks@v1.0.1",
+                "github.com/bodgit/gssapi@v0.0.4",
+                "github.com/bodgit/tsig@v1.3.1",
+                "github.com/boombuler/barcode@v1.0.1",
+                "github.com/cenkalti/backoff/v4@v4.3.0",
+                "github.com/cenkalti/backoff/v5@v5.0.3",
+                "github.com/cespare/xxhash/v2@v2.3.0",
+                "github.com/clbanning/mxj/v2@v2.7.0",
+                "github.com/containerd/errdefs/pkg@v0.3.0",
+                "github.com/containerd/errdefs@v1.0.0",
+                "github.com/containous/alice@v0.0.0-20181107144136-d83ebdd94cbd",
+                "github.com/containous/go-http-auth@v0.4.1-0.20260804094822-b975dcaa8c48",
+                "github.com/containous/mux@v0.0.0-20250523120546-41b6ec3aed59",
+                "github.com/coreos/go-semver@v0.3.1",
+                "github.com/coreos/go-systemd/v22@v22.7.0",
+                "github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc",
+                "github.com/deepmap/oapi-codegen@v1.9.1",
+                "github.com/desertbit/timer@v0.0.0-20180107155436-c41aec40b27f",
+                "github.com/distribution/reference@v0.6.0",
+                "github.com/dnsimple/dnsimple-go/v9@v9.1.0",
+                "github.com/docker/cli@v29.4.0+incompatible",
+                "github.com/docker/go-connections@v0.6.0",
+                "github.com/docker/go-units@v0.5.0",
+                "github.com/emicklei/go-restful/v3@v3.13.0",
+                "github.com/evanphx/json-patch/v5@v5.9.11",
+                "github.com/exoscale/egoscale/v3@v3.1.41",
+                "github.com/fatih/color@v1.18.0",
+                "github.com/fatih/structs@v1.1.0",
+                "github.com/felixge/httpsnoop@v1.0.4",
+                "github.com/fsnotify/fsnotify@v1.10.1",
+                "github.com/fxamacker/cbor/v2@v2.9.1",
+                "github.com/gabriel-vasile/mimetype@v1.4.13",
+                "github.com/ghodss/yaml@v1.0.0",
+                "github.com/go-acme/alidns-20150109/v5@v5.5.0",
+                "github.com/go-acme/esa-20240910/v3@v3.4.0",
+                "github.com/go-acme/jdcloud-sdk-go@v1.64.0",
+                "github.com/go-acme/lego/v5@v5.3.1",
+                "github.com/go-acme/tencentclouddnspod@v1.3.24",
+                "github.com/go-acme/tencentedgdeone@v1.3.38",
+                "github.com/go-errors/errors@v1.0.1",
+                "github.com/go-jose/go-jose/v4@v4.1.4",
+                "github.com/go-kit/kit@v0.13.0",
+                "github.com/go-kit/log@v0.2.1",
+                "github.com/go-logfmt/logfmt@v0.5.1",
+                "github.com/go-logr/logr@v1.4.3",
+                "github.com/go-logr/stdr@v1.2.2",
+                "github.com/go-openapi/jsonpointer@v0.23.1",
+                "github.com/go-openapi/jsonreference@v0.21.5",
+                "github.com/go-openapi/swag/cmdutils@v0.26.0",
+                "github.com/go-openapi/swag/conv@v0.26.0",
+                "github.com/go-openapi/swag/fileutils@v0.26.0",
+                "github.com/go-openapi/swag/jsonname@v0.26.0",
+                "github.com/go-openapi/swag/jsonutils@v0.26.0",
+                "github.com/go-openapi/swag/loading@v0.26.0",
+                "github.com/go-openapi/swag/mangling@v0.26.0",
+                "github.com/go-openapi/swag/netutils@v0.26.0",
+                "github.com/go-openapi/swag/stringutils@v0.26.0",
+                "github.com/go-openapi/swag/typeutils@v0.26.0",
+                "github.com/go-openapi/swag/yamlutils@v0.26.0",
+                "github.com/go-openapi/swag@v0.26.0",
+                "github.com/go-ozzo/ozzo-validation/v4@v4.3.0",
+                "github.com/go-playground/locales@v0.14.1",
+                "github.com/go-playground/universal-translator@v0.18.1",
+                "github.com/go-playground/validator/v10@v10.30.3",
+                "github.com/go-resty/resty/v2@v2.17.2",
+                "github.com/go-viper/mapstructure/v2@v2.5.0",
+                "github.com/go-zookeeper/zk@v1.0.3",
+                "github.com/goccy/go-yaml@v1.19.2",
+                "github.com/gofrs/flock@v0.13.0",
+                "github.com/gofrs/uuid@v4.4.0+incompatible",
+                "github.com/gogo/protobuf@v1.3.2",
+                "github.com/golang-jwt/jwt/v4@v4.5.2",
+                "github.com/golang-jwt/jwt/v5@v5.3.1",
+                "github.com/golang/protobuf@v1.5.4",
+                "github.com/google/gnostic-models@v0.7.1",
+                "github.com/google/go-cmp@v0.7.0",
+                "github.com/google/go-github/v90@v90.0.0",
+                "github.com/google/go-querystring@v1.2.0",
+                "github.com/google/s2a-go@v0.1.9",
+                "github.com/google/uuid@v1.6.0",
+                "github.com/googleapis/enterprise-certificate-proxy@v0.3.17",
+                "github.com/googleapis/gax-go/v2@v2.22.0",
+                "github.com/gophercloud/gophercloud@v1.14.1",
+                "github.com/gophercloud/utils@v0.0.0-20231010081019-80377eca5d56",
+                "github.com/gorilla/websocket@v1.5.4-0.20250319132907-e064f32e3674",
+                "github.com/gravitational/trace@v1.5.1",
+                "github.com/grpc-ecosystem/grpc-gateway/v2@v2.29.0",
+                "github.com/hashicorp/consul/api@v1.26.1",
+                "github.com/hashicorp/cronexpr@v1.1.2",
+                "github.com/hashicorp/errwrap@v1.1.0",
+                "github.com/hashicorp/go-cleanhttp@v0.5.2",
+                "github.com/hashicorp/go-hclog@v1.6.3",
+                "github.com/hashicorp/go-immutable-radix@v1.3.1",
+                "github.com/hashicorp/go-multierror@v1.1.1",
+                "github.com/hashicorp/go-retryablehttp@v0.7.8",
+                "github.com/hashicorp/go-rootcerts@v1.0.2",
+                "github.com/hashicorp/go-uuid@v1.0.3",
+                "github.com/hashicorp/go-version@v1.9.0",
+                "github.com/hashicorp/golang-lru@v1.0.2",
+                "github.com/hashicorp/hcl@v1.0.1-vault-5",
+                "github.com/hashicorp/nomad/api@v0.0.0-20231213195942-64e3dca9274b",
+                "github.com/hashicorp/serf@v0.10.1",
+                "github.com/http-wasm/http-wasm-host-go@v0.7.0",
+                "github.com/huandu/xstrings@v1.5.0",
+                "github.com/huaweicloud/huaweicloud-sdk-go-v3@v0.1.205",
+                "github.com/imdario/mergo@v0.3.16",
+                "github.com/influxdata/influxdb-client-go/v2@v2.7.0",
+                "github.com/influxdata/influxdb1-client@v0.0.0-20200827194710-b269163b24ab",
+                "github.com/influxdata/line-protocol@v0.0.0-20200327222509-2487e7298839",
+                "github.com/infobloxopen/infoblox-go-client/v2@v2.11.0",
+                "github.com/jcmturner/aescts/v2@v2.0.0",
+                "github.com/jcmturner/dnsutils/v2@v2.0.0",
+                "github.com/jcmturner/gofork@v1.7.6",
+                "github.com/jcmturner/goidentity/v6@v6.0.1",
+                "github.com/jcmturner/gokrb5/v8@v8.4.4",
+                "github.com/jcmturner/rpc/v2@v2.0.3",
+                "github.com/json-iterator/go@v1.1.13-0.20220915233716-71ac16282d12",
+                "github.com/k0kubun/go-ansi@v0.0.0-20180517002512-3bf9e2903213",
+                "github.com/klauspost/compress@v1.19.1",
+                "github.com/kolo/xmlrpc@v0.0.0-20220921171641-a4b6fa1dd06b",
+                "github.com/kvtools/consul@v1.0.2",
+                "github.com/kvtools/etcdv3@v1.0.3",
+                "github.com/kvtools/redis@v1.2.1",
+                "github.com/kvtools/valkeyrie@v1.0.0",
+                "github.com/kvtools/zookeeper@v1.0.2",
+                "github.com/kylelemons/godebug@v1.1.0",
+                "github.com/labbsr0x/bindman-dns-webhook@v1.0.2",
+                "github.com/labbsr0x/goh@v1.0.1",
+                "github.com/leodido/go-urn@v1.4.0",
+                "github.com/linode/linodego@v1.69.1",
+                "github.com/liquidweb/liquidweb-cli@v0.7.0",
+                "github.com/liquidweb/liquidweb-go@v1.6.4",
+                "github.com/magiconair/properties@v1.8.10",
+                "github.com/mailgun/multibuf@v0.2.0",
+                "github.com/mattn/go-colorable@v0.1.14",
+                "github.com/mattn/go-isatty@v0.0.22",
+                "github.com/miekg/dns@v1.1.72",
+                "github.com/mimuret/golang-iij-dpf@v0.9.1",
+                "github.com/mitchellh/copystructure@v1.2.0",
+                "github.com/mitchellh/go-homedir@v1.1.0",
+                "github.com/mitchellh/go-ps@v1.0.0",
+                "github.com/mitchellh/hashstructure@v1.0.0",
+                "github.com/mitchellh/mapstructure@v1.5.1-0.20231216201459-8508981c8b6c",
+                "github.com/mitchellh/reflectwalk@v1.0.2",
+                "github.com/moby/docker-image-spec@v1.3.1",
+                "github.com/moby/moby/api@v1.54.1",
+                "github.com/moby/moby/client@v0.4.0",
+                "github.com/modern-go/concurrent@v0.0.0-20180306012644-bacd9c7ef1dd",
+                "github.com/modern-go/reflect2@v1.0.3-0.20250322232337-35a7c28c31ee",
+                "github.com/munnerz/goautoneg@v0.0.0-20191010083416-a7dc8b61c822",
+                "github.com/namedotcom/go/v4@v4.0.2",
+                "github.com/nrdcg/auroradns@v1.2.0",
+                "github.com/nrdcg/bunny-go@v0.1.0",
+                "github.com/nrdcg/desec@v0.11.1",
+                "github.com/nrdcg/freemyip@v0.3.0",
+                "github.com/nrdcg/goacmedns@v0.2.0",
+                "github.com/nrdcg/goinwx@v0.12.0",
+                "github.com/nrdcg/mailinabox@v0.3.0",
+                "github.com/nrdcg/namesilo@v0.5.0",
+                "github.com/nrdcg/nodion@v0.1.0",
+                "github.com/nrdcg/oci-go-sdk/common/v1065@v1065.120.0",
+                "github.com/nrdcg/oci-go-sdk/dns/v1065@v1065.120.0",
+                "github.com/nrdcg/porkbun@v0.4.0",
+                "github.com/nrdcg/vegadns@v0.3.0",
+                "github.com/nzdjb/go-metaname@v1.0.0",
+                "github.com/opencontainers/go-digest@v1.0.0",
+                "github.com/opencontainers/image-spec@v1.1.1",
+                "github.com/ovh/go-ovh@v1.9.0",
+                "github.com/patrickmn/go-cache@v2.1.0+incompatible",
+                "github.com/pelletier/go-toml/v2@v2.2.4",
+                "github.com/peterhellberg/link@v1.2.0",
+                "github.com/pires/go-proxyproto@v0.12.0",
+                "github.com/pkg/browser@v0.0.0-20240102092130-5ac0b6a4141c",
+                "github.com/pkg/errors@v0.9.1",
+                "github.com/pmezard/go-difflib@v1.0.1-0.20181226105442-5d4384ee4fb2",
+                "github.com/pquerna/otp@v1.5.0",
+                "github.com/prometheus/client_golang@v1.23.2",
+                "github.com/prometheus/client_model@v0.6.2",
+                "github.com/prometheus/common@v0.67.5",
+                "github.com/prometheus/procfs@v0.20.1",
+                "github.com/quic-go/qpack@v0.6.0",
+                "github.com/quic-go/quic-go@v0.61.0",
+                "github.com/redis/go-redis/v9@v9.21.0",
+                "github.com/regfish/regfish-dnsapi-go@v0.1.1",
+                "github.com/rs/cors@v1.7.0",
+                "github.com/rs/zerolog@v1.34.0",
+                "github.com/sacloud/api-client-go@v0.3.5",
+                "github.com/sacloud/go-http@v0.1.9",
+                "github.com/sacloud/iaas-api-go@v1.29.2",
+                "github.com/sacloud/packages-go@v0.1.0",
+                "github.com/sacloud/saclient-go@v0.4.0",
+                "github.com/sagikazarmark/slog-shim@v0.1.0",
+                "github.com/samber/lo@v1.53.0",
+                "github.com/samber/slog-common@v0.21.0",
+                "github.com/samber/slog-zerolog/v2@v2.9.2",
+                "github.com/scaleway/scaleway-sdk-go@v1.0.0-beta.36",
+                "github.com/selectel/domains-go@v1.1.0",
+                "github.com/selectel/go-selvpcclient/v4@v4.2.0",
+                "github.com/shopspring/decimal@v1.4.0",
+                "github.com/sirupsen/logrus@v1.9.4",
+                "github.com/softlayer/softlayer-go@v1.2.1",
+                "github.com/softlayer/xmlrpc@v0.0.0-20200409220501-5f089df7cb7e",
+                "github.com/sony/gobreaker/v2@v2.4.0",
+                "github.com/spf13/afero@v1.15.0",
+                "github.com/spf13/cast@v1.7.0",
+                "github.com/spf13/pflag@v1.0.10",
+                "github.com/spf13/viper@v1.18.2",
+                "github.com/spiffe/go-spiffe/v2@v2.6.0",
+                "github.com/stealthrocket/wasi-go@v0.8.0",
+                "github.com/stealthrocket/wazergo@v0.19.1",
+                "github.com/stretchr/objx@v0.5.3",
+                "github.com/stretchr/testify@v1.11.1",
+                "github.com/subosito/gotenv@v1.6.0",
+                "github.com/tailscale/tscert@v0.0.0-20230806124524-28a91b69a046",
+                "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common@v1.3.133",
+                "github.com/tetratelabs/wazero@v1.8.0",
+                "github.com/tjfoc/gmsm@v1.4.1",
+                "github.com/traefik/grpc-web@v0.16.0",
+                "github.com/traefik/paerser@v0.2.2",
+                "github.com/traefik/yaegi@v0.16.1",
+                "github.com/transip/gotransip/v6@v6.27.2",
+                "github.com/tufanbarisyildirim/gonginx@v0.0.0-20250620092546-c3e307e36701",
+                "github.com/ucloud/ucloud-sdk-go@v0.22.90",
+                "github.com/ultradns/ultradns-go-sdk@v1.8.2-20260507133303-3f324c7",
+                "github.com/unrolled/render@v1.0.2",
+                "github.com/unrolled/secure@v1.0.9",
+                "github.com/valyala/bytebufferpool@v1.0.0",
+                "github.com/valyala/fasthttp@v1.73.0",
+                "github.com/vinyldns/go-vinyldns@v0.9.18",
+                "github.com/volcengine/volc-sdk-golang@v1.0.251",
+                "github.com/vulcand/oxy/v2@v2.1.0",
+                "github.com/vulcand/predicate@v1.3.0",
+                "github.com/vultr/govultr/v3@v3.31.2",
+                "github.com/x448/float16@v0.8.4",
+                "github.com/yandex-cloud/go-genproto@v0.95.0",
+                "github.com/yandex-cloud/go-sdk/services/dns@v0.0.65",
+                "github.com/yandex-cloud/go-sdk/v2@v2.136.0",
+                "github.com/youmark/pkcs8@v0.0.0-20240726163527-a2c0da244d78",
+                "go.etcd.io/etcd/api/v3@v3.6.14",
+                "go.etcd.io/etcd/client/pkg/v3@v3.6.14",
+                "go.etcd.io/etcd/client/v3@v3.6.14",
+                "go.mongodb.org/mongo-driver@v1.17.9",
+                "go.opentelemetry.io/auto/sdk@v1.2.1",
+                "go.opentelemetry.io/contrib/bridges/otellogrus@v0.13.0",
+                "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp@v0.67.0",
+                "go.opentelemetry.io/contrib/propagators/autoprop@v0.63.0",
+                "go.opentelemetry.io/contrib/propagators/aws@v1.38.0",
+                "go.opentelemetry.io/contrib/propagators/b3@v1.38.0",
+                "go.opentelemetry.io/contrib/propagators/jaeger@v1.38.0",
+                "go.opentelemetry.io/contrib/propagators/ot@v1.38.0",
+                "go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc@v0.20.0",
+                "go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp@v0.20.0",
+                "go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc@v1.44.0",
+                "go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp@v1.44.0",
+                "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc@v1.44.0",
+                "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp@v1.44.0",
+                "go.opentelemetry.io/otel/exporters/otlp/otlptrace@v1.44.0",
+                "go.opentelemetry.io/otel/log@v0.20.0",
+                "go.opentelemetry.io/otel/metric@v1.44.0",
+                "go.opentelemetry.io/otel/sdk/log@v0.20.0",
+                "go.opentelemetry.io/otel/sdk/metric@v1.44.0",
+                "go.opentelemetry.io/otel/sdk@v1.44.0",
+                "go.opentelemetry.io/otel/trace@v1.44.0",
+                "go.opentelemetry.io/otel@v1.44.0",
+                "go.opentelemetry.io/proto/otlp@v1.10.0",
+                "go.uber.org/atomic@v1.11.0",
+                "go.uber.org/multierr@v1.11.0",
+                "go.uber.org/ratelimit@v0.3.1",
+                "go.uber.org/zap@v1.28.0",
+                "go.yaml.in/yaml/v2@v2.4.4",
+                "go.yaml.in/yaml/v3@v3.0.4",
+                "golang.org/x/crypto@v0.55.0",
+                "golang.org/x/exp@v0.0.0-20260410095643-746e56fc9e2f",
+                "golang.org/x/mod@v0.40.0",
+                "golang.org/x/net@v0.58.0",
+                "golang.org/x/oauth2@v0.36.0",
+                "golang.org/x/sync@v0.22.0",
+                "golang.org/x/sys@v0.47.0",
+                "golang.org/x/term@v0.45.0",
+                "golang.org/x/text@v0.41.0",
+                "golang.org/x/time@v0.15.0",
+                "gomodules.xyz/jsonpatch/v2@v2.5.0",
+                "google.golang.org/api@v0.288.0",
+                "google.golang.org/genproto/googleapis/api@v0.0.0-20260526163538-3dc84a4a5aaa",
+                "google.golang.org/genproto/googleapis/rpc@v0.0.0-20260630182238-925bb5da69e7",
+                "google.golang.org/grpc@v1.82.1",
+                "google.golang.org/protobuf@v1.36.12-0.20260120151049-f2248ac996af",
+                "gopkg.in/evanphx/json-patch.v4@v4.13.0",
+                "gopkg.in/inf.v0@v0.9.1",
+                "gopkg.in/ini.v1@v1.67.3",
+                "gopkg.in/natefinch/lumberjack.v2@v2.2.1",
+                "gopkg.in/ns1/ns1-go.v2@v2.18.0",
+                "gopkg.in/yaml.v2@v2.4.0",
+                "gopkg.in/yaml.v3@v3.0.1",
+                "k8s.io/api@v0.36.1",
+                "k8s.io/apiextensions-apiserver@v0.36.1",
+                "k8s.io/apimachinery@v0.36.1",
+                "k8s.io/client-go@v0.36.1",
+                "k8s.io/klog/v2@v2.140.0",
+                "k8s.io/kube-openapi@v0.0.0-20260501160325-927ab1f70cd6",
+                "k8s.io/utils@v0.0.0-20260319190234-28399d86e0b5",
+                "knative.dev/networking@v0.0.0-20251217020127-11890a5dabea",
+                "knative.dev/pkg@v0.0.0-20251216153728-9c8140b780d1",
+                "mvdan.cc/xurls/v2@v2.5.0",
+                "nhooyr.io/websocket@v1.8.7",
+                "sigs.k8s.io/gateway-api@v1.6.1",
+                "sigs.k8s.io/json@v0.0.0-20250730193827-2d320260d730",
+                "sigs.k8s.io/randfill@v1.0.0",
+                "sigs.k8s.io/structured-merge-diff/v6@v6.4.0",
+                "sigs.k8s.io/yaml@v1.6.0",
+                "software.sslmate.com/src/go-pkcs12@v0.7.3",
+                "stdlib@v1.26.7"
+              ],
+              "Layer": {
+                "Digest": "sha256:b8872d6907f274fec46cae619a8a573cc541fbf64f952a84d6285a1a073a462a",
+                "DiffID": "sha256:84e7412d7560bc960f3a9f52c6f623ec4ea88c806665635a84e681feae41184f"
+              },
+              "AnalyzedBy": "gobinary"
+            },
+            {
+              "ID": "golang.org/x/crypto@v0.55.0",
+              "Name": "golang.org/x/crypto",
+              "Identifier": {
+                "PURL": "pkg:golang/golang.org/x/crypto@v0.55.0",
+                "UID": "5b9ffdc644dfbe78"
+              },
+              "Version": "v0.55.0",
+              "Layer": {
+                "Digest": "sha256:b8872d6907f274fec46cae619a8a573cc541fbf64f952a84d6285a1a073a462a",
+                "DiffID": "sha256:84e7412d7560bc960f3a9f52c6f623ec4ea88c806665635a84e681feae41184f"
+              },
+              "AnalyzedBy": "gobinary"
+            }
+          ],
+          "Vulnerabilities": [
+            {
+              "VulnerabilityID": "CVE-2026-88007",
+              "VendorIDs": [
+                "GHSA-qqjf-53cj-pwvv"
+              ],
+              "PkgID": "github.com/traefik/traefik/v3@v3.7.12",
+              "PkgName": "github.com/traefik/traefik/v3",
+              "PkgIdentifier": {
+                "PURL": "pkg:golang/github.com/traefik/traefik/v3@v3.7.12",
+                "UID": "2ee5d3110322e200"
+              },
+              "InstalledVersion": "v3.7.12",
+              "FixedVersion": "3.7.13",
+              "Status": "fixed",
+              "Layer": {
+                "Digest": "sha256:b8872d6907f274fec46cae619a8a573cc541fbf64f952a84d6285a1a073a462a",
+                "DiffID": "sha256:84e7412d7560bc960f3a9f52c6f623ec4ea88c806665635a84e681feae41184f"
+              },
+              "SeveritySource": "ghsa",
+              "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-88007",
+              "DataSource": {
+                "ID": "ghsa",
+                "Name": "GitHub Security Advisory Go",
+                "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Ago"
+              },
+              "Fingerprint": "sha256:0f08ff79af18efe75313d607993fe0c45d9804351b164e30b8e6ea06dd9ba4a3",
+              "Title": "Traefik HTTP/3 Backend NTLM Connection Reuse",
+              "Description": "Traefik is an open source HTTP reverse proxy and load balancer. From 2.11.0 until 2.11.57 and 3.7.13, the HTTP/3 entrypoint ConnContext does not call service.AddTransportOnContext, so kerberosRoundTripper uses a shared backend transport instead of a transport dedicated to each frontend connection. With HTTP/3 enabled, a backend using connection-bound NTLM or Negotiate authentication, and backend keep-alive, an unrelated client can reuse a backend connection authenticated for a victim, read victim-only data, and act as that victim without the victim credentials. This issue is fixed in 2.11.57 and 3.7.13.",
+              "Severity": "CRITICAL",
+              "CweIDs": [
+                "CWE-287",
+                "CWE-863"
+              ],
+              "VendorSeverity": {
+                "ghsa": 4
+              },
+              "CVSS": {
+                "ghsa": {
+                  "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N",
+                  "V40Score": 9.1
+                }
+              },
+              "References": [
+                "https://github.com/traefik/traefik",
+                "https://github.com/traefik/traefik/commit/ff39c47d7459dec9cd8de63c1a4e7aa7315bdc1c",
+                "https://github.com/traefik/traefik/pull/13812",
+                "https://github.com/traefik/traefik/releases/tag/v2.11.57",
+                "https://github.com/traefik/traefik/releases/tag/v3.7.13",
+                "https://github.com/traefik/traefik/security/advisories/GHSA-qqjf-53cj-pwvv",
+                "https://nvd.nist.gov/vuln/detail/CVE-2026-88007"
+              ],
+              "PublishedDate": "2026-09-10T15:17:56.183Z",
+              "LastModifiedDate": "2026-09-10T19:54:25.81Z"
+            },
+            {
+              "VulnerabilityID": "GO-2026-5932",
+              "PkgID": "golang.org/x/crypto@v0.55.0",
+              "PkgName": "golang.org/x/crypto",
+              "PkgIdentifier": {
+                "PURL": "pkg:golang/golang.org/x/crypto@v0.55.0",
+                "UID": "5b9ffdc644dfbe78"
+              },
+              "InstalledVersion": "v0.55.0",
+              "Status": "affected",
+              "Layer": {
+                "Digest": "sha256:b8872d6907f274fec46cae619a8a573cc541fbf64f952a84d6285a1a073a462a",
+                "DiffID": "sha256:84e7412d7560bc960f3a9f52c6f623ec4ea88c806665635a84e681feae41184f"
+              },
+              "DataSource": {
+                "ID": "govulndb",
+                "Name": "The Go Vulnerability Database",
+                "URL": "https://pkg.go.dev/vuln/"
+              },
+              "Fingerprint": "sha256:8fa8d22f0dbfa2de4ba341630aeac0f3314ef1b02335feb0f9f64b8433367b3e",
+              "Title": "The golang.org/x/crypto/openpgp package is unmaintained, unsafe by design, and has known security issues",
+              "Description": "The golang.org/x/crypto/openpgp package is unsafe by design, has numerous known security issues, is not maintained, and should not be used.\n\nIf you are required to interoperate with OpenPGP systems and need a maintained package, consider github.com/ProtonMail/go-crypto/openpgp which is a maintained fork that aims to be a drop-in replacement for this package.",
+              "Severity": "UNKNOWN",
+              "References": [
+                "https://go.dev/issue/44226",
+                "https://pkg.go.dev/vuln/GO-2026-5932"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "kube-system",
+      "Kind": "Deployment",
+      "Name": "coredns",
+      "Metadata": [
+        {}
+      ],
+      "Error": "scan error: scan failed: failed analysis: analyze error: pipeline error: failed to analyze layer (sha256:d57ab43be2c98934f2fa548b6be4ea1d06d9b87d6c9c17a0a6550800475aaa6f): unable to get uncompressed layer sha256:d57ab43be2c98934f2fa548b6be4ea1d06d9b87d6c9c17a0a6550800475aaa6f: failed to get the layer (sha256:d57ab43be2c98934f2fa548b6be4ea1d06d9b87d6c9c17a0a6550800475aaa6f): unable to populate: unable to open: failed to initialize the struct from the temporary file: file blobs/sha256/fe81a497e85f174f8d7d5739d14f5184141f4e80596977ff8f838d7062fecf02 not found in tar"
+    },
+    {
+      "Namespace": "traefik",
+      "Kind": "ServiceAccount",
+      "Name": "default",
+      "Metadata": [
+        {}
+      ],
+      "Results": [
+        {
+          "Target": "ServiceAccount/default",
+          "Class": "config",
+          "Type": "kubernetes",
+          "MisconfSummary": {
+            "Successes": 115,
+            "Failures": 0
+          }
+        }
+      ]
+    }
+  ]
+}

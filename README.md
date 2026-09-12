@@ -10,6 +10,7 @@ GitHub Release assets and are never committed to Git.
 | Package                                        | Needs                                                  |
 | ---------------------------------------------- | ------------------------------------------------------ |
 | [`popeye`](plugins/popeye)                     | [Popeye](https://github.com/derailed/popeye) on `PATH` |
+| [`trivy`](plugins/trivy)                       | [Trivy](https://trivy.dev) on `PATH`                   |
 | [`resource-summary`](plugins/resource-summary) | nothing                                                |
 
 The complete scope, design, and acceptance criteria are in
