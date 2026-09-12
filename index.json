@@ -1,7 +1,69 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-12T11:21:37Z",
+  "generated_at": "2026-09-12T11:31:11Z",
   "plugins": [
+    {
+      "id": "oha",
+      "display_name": "HTTP benchmark",
+      "description": "Benchmark the selected pod or service over a managed port-forward with oha.",
+      "tags": [
+        "benchmark",
+        "http",
+        "load",
+        "report"
+      ],
+      "publisher": "vyrti",
+      "repository": "https://github.com/nklmilojevic/sofka-plugins",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sofka": ">=0.26.0",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/b30a83499f73052b5be6463ed304108f02382b1f/plugins/oha/README.md",
+          "requirements": [
+            {
+              "name": "oha",
+              "install": "Install oha from https://github.com/hatoo/oha#installation"
+            }
+          ],
+          "command": "./adapter",
+          "target": "selection",
+          "output": "report",
+          "mutating": false,
+          "confirm": false,
+          "dangerous": false,
+          "network_load": true,
+          "source_commit": "b30a83499f73052b5be6463ed304108f02382b1f",
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "x86_64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.0/oha-0.1.0-x86_64-unknown-linux-gnu.tar.zst",
+              "blake3": "fa634c118099168a143f22234002dc2e0dd988491fda833de03c3dd9d7fe0ba0",
+              "size": 271849
+            },
+            {
+              "platform": "aarch64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.0/oha-0.1.0-aarch64-unknown-linux-gnu.tar.zst",
+              "blake3": "8501167b11be0775d4562f7a2a8a2741c41bb3b7bc48a7c602abcd4ca7bc40b4",
+              "size": 250474
+            },
+            {
+              "platform": "x86_64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.0/oha-0.1.0-x86_64-apple-darwin.tar.zst",
+              "blake3": "4ae4c8f6e0ef9ac445b591832c0d1e645577a6cd3bc5fd2c77ce974fad6ae75c",
+              "size": 259855
+            },
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.0/oha-0.1.0-aarch64-apple-darwin.tar.zst",
+              "blake3": "10516620b50775f5cb5e878327da0ecabb3ed3f31bc5c6b9cea8cc59e78cc7cb",
+              "size": 237972
+            }
+          ]
+        }
+      ]
+    },
     {
       "id": "popeye",
       "display_name": "Popeye scan",
