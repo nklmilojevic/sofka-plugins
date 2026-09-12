@@ -1,0 +1,33 @@
+schema_version = 1
+
+[package]
+version = "0.1.0"
+authors = ["vyrti"]
+license = "MIT OR Apache-2.0"
+description = "Scan the active context with Popeye and report findings by linter."
+repository = "https://github.com/nklmilojevic/sofka-plugins"
+readme = "README.md"
+sofka = ">=0.26.0"
+platforms = [
+  "x86_64-unknown-linux-gnu",
+  "aarch64-unknown-linux-gnu",
+  "x86_64-apple-darwin",
+  "aarch64-apple-darwin",
+]
+tags = ["diagnostics", "report", "audit"]
+
+[plugin]
+name = "Popeye scan"
+palette = "popeye"
+command = "./adapter"
+args = []
+requires = ["popeye"]
+install = "Install Popeye from https://github.com/derailed/popeye#installation"
+output = "report"
+target = "context"
+mutating = false
+timeout = "5m"
+
+[plugin.inputs.report]
+type = "string"
+default = ""

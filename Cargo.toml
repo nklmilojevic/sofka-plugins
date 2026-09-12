@@ -1,5 +1,5 @@
 [workspace]
-members = ["plugins/resource-summary"]
+members = ["plugins/popeye", "plugins/resource-summary"]
 resolver = "3"
 
 [workspace.package]

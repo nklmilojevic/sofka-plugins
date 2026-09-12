@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "context": "docker-desktop",
+  "cluster": "docker-desktop",
+  "namespace": "default",
+  "resource": "pods",
+  "name": "",
+  "filter": "",
+  "inputs": { "report": "plugins/popeye/fixtures/scan.json" },
+  "object": null,
+  "forward": null
+}

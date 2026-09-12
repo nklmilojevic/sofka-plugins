@@ -7,9 +7,10 @@ Sofka reads the complete catalog from [`index.json`](index.json) once per
 command. Package source remains under `plugins/<id>/`; compiled archives are
 GitHub Release assets and are never committed to Git.
 
-| Package                                        | Needs   |
-| ---------------------------------------------- | ------- |
-| [`resource-summary`](plugins/resource-summary) | nothing |
+| Package                                        | Needs                                                  |
+| ---------------------------------------------- | ------------------------------------------------------ |
+| [`popeye`](plugins/popeye)                     | [Popeye](https://github.com/derailed/popeye) on `PATH` |
+| [`resource-summary`](plugins/resource-summary) | nothing                                                |
 
 The complete scope, design, and acceptance criteria are in
 [sofka issue #502](https://github.com/nklmilojevic/sofka/issues/502).

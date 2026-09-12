@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "sections": [
+    {
+      "columns": [
+        "Field",
+        "Value"
+      ],
+      "rows": [
+        [
+          "Score",
+          "96% (A)"
+        ],
+        [
+          "Context",
+          "docker-desktop"
+        ],
+        [
+          "Cluster",
+          "docker-desktop"
+        ],
+        [
+          "Namespace",
+          "default"
+        ],
+        [
+          "Scanned",
+          "2026-09-12T13:29:52+03:00"
+        ],
+        [
+          "Linters",
+          "21"
+        ]
+      ],
+      "title": "Summary"
+    },
+    {
+      "lines": [
+        "ok 1 · info 0 · warning 0 · error 0"
+      ],
+      "title": "configmaps — 100% (v1/configmaps)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "cronjobs — 100% (batch/v1/cronjobs)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "daemonsets — 100% (apps/v1/daemonsets)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "deployments — 100% (apps/v1/deployments)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "gateways — 100% (gateway.networking.k8s.io/v1/gateways)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "horizontalpodautoscalers — 100% (autoscaling/v2/horizontalpodautoscalers)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "httproutes — 100% (gateway.networking.k8s.io/v1/httproutes)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "ingresses — 100% (networking.k8s.io/v1/ingresses)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "jobs — 100% (batch/v1/jobs)"
+    },
+    {
+      "lines": [
+        "ok 1 · info 0 · warning 0 · error 0"
+      ],
+      "title": "namespaces — 100% (v1/namespaces)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "networkpolicies — 100% (networking.k8s.io/v1/networkpolicies)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "persistentvolumeclaims — 100% (v1/persistentvolumeclaims)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "pods — 100% (v1/pods)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "poddisruptionbudgets — 100% (policy/v1/poddisruptionbudgets)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "replicasets — 100% (apps/v1/replicasets)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "roles — 100% (rbac.authorization.k8s.io/v1/roles)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "rolebindings — 100% (rbac.authorization.k8s.io/v1/rolebindings)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "secrets — 100% (v1/secrets)"
+    },
+    {
+      "lines": [
+        "ok 1 · info 0 · warning 0 · error 4",
+        "  default/lb-proxy-hyper",
+        "    ERROR [POP-1100] No pods match service selector",
+        "    WARNING [POP-1110] Match EP has no subsets",
+        "    INFO [POP-1104] Do you mean it? Type NodePort detected",
+        "  default/lb-proxy-monoio",
+        "    ERROR [POP-1100] No pods match service selector",
+        "    WARNING [POP-1110] Match EP has no subsets",
+        "    INFO [POP-1104] Do you mean it? Type NodePort detected",
+        "  default/lb-proxy-pingora",
+        "    ERROR [POP-1100] No pods match service selector",
+        "    WARNING [POP-1110] Match EP has no subsets",
+        "    INFO [POP-1104] Do you mean it? Type NodePort detected",
+        "  default/mock-upstream",
+        "    ERROR [POP-1100] No pods match service selector",
+        "    WARNING [POP-1110] Match EP has no subsets"
+      ],
+      "title": "services — 20% (v1/services)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "serviceaccounts — 100% (v1/serviceaccounts)"
+    },
+    {
+      "lines": [
+        "ok 0 · info 0 · warning 0 · error 0"
+      ],
+      "title": "statefulsets — 100% (apps/v1/statefulsets)"
+    },
+    {
+      "lines": [
+        "the server could not find the requested resource"
+      ],
+      "title": "Report errors"
+    }
+  ],
+  "title": "Popeye scan"
+}

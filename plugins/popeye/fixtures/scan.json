@@ -1,0 +1,323 @@
+{
+  "popeye": {
+    "report_time": "2026-09-12T13:29:52+03:00",
+    "score": 96,
+    "grade": "A",
+    "sections": [
+      {
+        "linter": "configmaps",
+        "gvr": "v1/configmaps",
+        "tally": {
+          "ok": 1,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        },
+        "issues": {}
+      },
+      {
+        "linter": "cronjobs",
+        "gvr": "batch/v1/cronjobs",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "daemonsets",
+        "gvr": "apps/v1/daemonsets",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "deployments",
+        "gvr": "apps/v1/deployments",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "gateways",
+        "gvr": "gateway.networking.k8s.io/v1/gateways",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "horizontalpodautoscalers",
+        "gvr": "autoscaling/v2/horizontalpodautoscalers",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "httproutes",
+        "gvr": "gateway.networking.k8s.io/v1/httproutes",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "ingresses",
+        "gvr": "networking.k8s.io/v1/ingresses",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "jobs",
+        "gvr": "batch/v1/jobs",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "namespaces",
+        "gvr": "v1/namespaces",
+        "tally": {
+          "ok": 1,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        },
+        "issues": {}
+      },
+      {
+        "linter": "networkpolicies",
+        "gvr": "networking.k8s.io/v1/networkpolicies",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "persistentvolumeclaims",
+        "gvr": "v1/persistentvolumeclaims",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "pods",
+        "gvr": "v1/pods",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "poddisruptionbudgets",
+        "gvr": "policy/v1/poddisruptionbudgets",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "replicasets",
+        "gvr": "apps/v1/replicasets",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "roles",
+        "gvr": "rbac.authorization.k8s.io/v1/roles",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "rolebindings",
+        "gvr": "rbac.authorization.k8s.io/v1/rolebindings",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "secrets",
+        "gvr": "v1/secrets",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "services",
+        "gvr": "v1/services",
+        "tally": {
+          "ok": 1,
+          "info": 0,
+          "warning": 0,
+          "error": 4,
+          "score": 20
+        },
+        "issues": {
+          "default/lb-proxy-hyper": [
+            {
+              "group": "__root__",
+              "gvr": "v1/services",
+              "level": 3,
+              "message": "[POP-1100] No pods match service selector"
+            },
+            {
+              "group": "__root__",
+              "gvr": "v1/services",
+              "level": 2,
+              "message": "[POP-1110] Match EP has no subsets"
+            },
+            {
+              "group": "__root__",
+              "gvr": "v1/services",
+              "level": 1,
+              "message": "[POP-1104] Do you mean it? Type NodePort detected"
+            }
+          ],
+          "default/lb-proxy-monoio": [
+            {
+              "group": "__root__",
+              "gvr": "v1/services",
+              "level": 3,
+              "message": "[POP-1100] No pods match service selector"
+            },
+            {
+              "group": "__root__",
+              "gvr": "v1/services",
+              "level": 2,
+              "message": "[POP-1110] Match EP has no subsets"
+            },
+            {
+              "group": "__root__",
+              "gvr": "v1/services",
+              "level": 1,
+              "message": "[POP-1104] Do you mean it? Type NodePort detected"
+            }
+          ],
+          "default/lb-proxy-pingora": [
+            {
+              "group": "__root__",
+              "gvr": "v1/services",
+              "level": 3,
+              "message": "[POP-1100] No pods match service selector"
+            },
+            {
+              "group": "__root__",
+              "gvr": "v1/services",
+              "level": 2,
+              "message": "[POP-1110] Match EP has no subsets"
+            },
+            {
+              "group": "__root__",
+              "gvr": "v1/services",
+              "level": 1,
+              "message": "[POP-1104] Do you mean it? Type NodePort detected"
+            }
+          ],
+          "default/mock-upstream": [
+            {
+              "group": "__root__",
+              "gvr": "v1/services",
+              "level": 3,
+              "message": "[POP-1100] No pods match service selector"
+            },
+            {
+              "group": "__root__",
+              "gvr": "v1/services",
+              "level": 2,
+              "message": "[POP-1110] Match EP has no subsets"
+            }
+          ]
+        }
+      },
+      {
+        "linter": "serviceaccounts",
+        "gvr": "v1/serviceaccounts",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      },
+      {
+        "linter": "statefulsets",
+        "gvr": "apps/v1/statefulsets",
+        "tally": {
+          "ok": 0,
+          "info": 0,
+          "warning": 0,
+          "error": 0,
+          "score": 100
+        }
+      }
+    ],
+    "errors": {
+      "error": "the server could not find the requested resource"
+    }
+  },
+  "ClusterName": "docker-desktop",
+  "ContextName": "docker-desktop"
+}
