@@ -1,0 +1,25 @@
+{
+  "summary": {
+    "successRate": 1.0,
+    "total": 3.003860875,
+    "slowest": 0.577411167,
+    "fastest": 0.000217667,
+    "average": 0.0013785588666112064,
+    "requestsPerSec": 7205.726530194245,
+    "totalData": 22155264,
+    "sizePerRequest": 1024
+  },
+  "latencyPercentiles": {
+    "p10": 0.000489167,
+    "p25": 0.000546083,
+    "p50": 0.000635,
+    "p75": 0.000788792,
+    "p90": 0.001105292,
+    "p95": 0.001443542,
+    "p99": 0.031008791,
+    "p99.9": 0.062437375,
+    "p99.99": 0.213679625
+  },
+  "statusCodeDistribution": { "200": 21636 },
+  "errorDistribution": { "aborted due to deadline": 9 }
+}

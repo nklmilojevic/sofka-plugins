@@ -284,6 +284,7 @@ def check_selection() -> None:
             "CONTRIBUTING.md\n": [],
             "plugins/resource-summary/src/main.rs\n": ["resource-summary"],
             "plugins/resource-summary/README.md\n": ["resource-summary"],
+            "plugins/oha/plugin.toml\n": ["oha"],
             "plugins/popeye/plugin.toml\n": ["popeye"],
             "plugins/trivy/plugin.toml\n": ["trivy"],
             ".github/workflows/ci.yaml\n": every,
