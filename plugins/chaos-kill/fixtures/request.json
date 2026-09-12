@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "context": "development",
+  "cluster": "development",
+  "namespace": "apps",
+  "resource": "deployments",
+  "name": "web",
+  "filter": "",
+  "inputs": {
+    "dry_run": "true",
+    "count": "2",
+    "wait": "120s",
+    "pods": "plugins/chaos-kill/fixtures/pods.json"
+  },
+  "object": {
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
+    "metadata": {
+      "name": "web",
+      "namespace": "apps",
+      "uid": "deployment-web"
+    },
+    "spec": {
+      "replicas": 3,
+      "selector": {
+        "matchLabels": {
+          "app": "web"
+        }
+      }
+    },
+    "status": {
+      "replicas": 3,
+      "readyReplicas": 3
+    }
+  },
+  "forward": null
+}

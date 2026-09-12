@@ -1,0 +1,35 @@
+{
+  "kind": "PodList",
+  "items": [
+    {
+      "metadata": { "name": "debug-shell", "uid": "uid-debug", "creationTimestamp": "2026-09-11T06:00:00Z" },
+      "status": { "phase": "Running", "conditions": [{ "type": "Ready", "status": "True" }] }
+    },
+    {
+      "metadata": { "name": "web-newest", "uid": "uid-newest", "creationTimestamp": "2026-09-11T12:00:00Z", "ownerReferences": [{ "kind": "ReplicaSet", "uid": "rs-web", "controller": true }] },
+      "status": { "phase": "Running", "conditions": [{ "type": "Ready", "status": "True" }] }
+    },
+    {
+      "metadata": { "name": "web-oldest", "uid": "uid-oldest", "creationTimestamp": "2026-09-11T09:00:00Z", "ownerReferences": [{ "kind": "ReplicaSet", "uid": "rs-web", "controller": true }] },
+      "status": { "phase": "Running", "conditions": [{ "type": "Ready", "status": "True" }] }
+    },
+    {
+      "metadata": { "name": "web-middle", "uid": "uid-middle", "creationTimestamp": "2026-09-11T10:00:00Z", "ownerReferences": [{ "kind": "ReplicaSet", "uid": "rs-web", "controller": true }] },
+      "status": { "phase": "Running", "conditions": [{ "type": "Ready", "status": "True" }] }
+    },
+    {
+      "metadata": {
+        "name": "web-terminating",
+        "uid": "uid-terminating",
+        "creationTimestamp": "2026-09-11T08:00:00Z",
+        "deletionTimestamp": "2026-09-11T12:30:00Z",
+        "ownerReferences": [{ "kind": "ReplicaSet", "uid": "rs-web", "controller": true }]
+      },
+      "status": { "phase": "Running" }
+    },
+    {
+      "metadata": { "name": "web-pending", "uid": "uid-pending", "creationTimestamp": "2026-09-11T07:00:00Z", "ownerReferences": [{ "kind": "ReplicaSet", "uid": "rs-web", "controller": true }] },
+      "status": { "phase": "Pending" }
+    }
+  ]
+}

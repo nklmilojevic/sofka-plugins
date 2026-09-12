@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "sections": [
+    {
+      "columns": [
+        "Field",
+        "Value"
+      ],
+      "rows": [
+        [
+          "Verdict",
+          "dry run — nothing was deleted"
+        ],
+        [
+          "Workload",
+          "Deployment/web"
+        ],
+        [
+          "Namespace",
+          "apps"
+        ],
+        [
+          "Selector",
+          "app=web"
+        ],
+        [
+          "Would kill",
+          "2"
+        ],
+        [
+          "Desired replicas",
+          "3"
+        ],
+        [
+          "Ready replicas",
+          "3"
+        ]
+      ],
+      "title": "Summary"
+    },
+    {
+      "lines": [
+        "  web-oldest",
+        "  web-middle"
+      ],
+      "title": "Pods that would be deleted"
+    },
+    {
+      "lines": [
+        "Re-run with dry_run=false to delete these pods and measure recovery."
+      ],
+      "title": "Notice"
+    }
+  ],
+  "title": "Chaos kill"
+}

@@ -9,6 +9,7 @@ GitHub Release assets and are never committed to Git.
 
 | Package                                        | Needs                                                  |
 | ---------------------------------------------- | ------------------------------------------------------ |
+| [`chaos-kill`](plugins/chaos-kill)             | `kubectl` on `PATH` — **deletes pods**                 |
 | [`oha`](plugins/oha)                           | [oha](https://github.com/hatoo/oha) on `PATH`          |
 | [`popeye`](plugins/popeye)                     | [Popeye](https://github.com/derailed/popeye) on `PATH` |
 | [`trivy`](plugins/trivy)                       | [Trivy](https://trivy.dev) on `PATH`                   |
