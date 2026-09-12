@@ -9,6 +9,13 @@ on:
 permissions:
   contents: read
 
+# Runs share the release tags and the per-commit catalog branch, so they are
+# serialised rather than left to race. A publication is never cancelled part
+# way through.
+concurrency:
+  group: publish-plugins
+  cancel-in-progress: false
+
 jobs:
   changes:
     runs-on: ubuntu-latest
@@ -157,9 +164,30 @@ jobs:
           branch="catalog/publish-${SOURCE_COMMIT:0:12}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # A merged catalog pull request means this commit's publication is
+          # already complete. Catalog generation refreshes `generated_at` on
+          # every run, so without this a rerun would open a timestamp-only
+          # pull request over work that has already landed.
+          state="$(gh pr view "$branch" --json state --jq .state 2>/dev/null || echo NONE)"
+          if [ "$state" = "MERGED" ]; then
+            echo "catalog entry for $SOURCE_COMMIT is already merged; nothing to publish."
+            exit 0
+          fi
           git switch -c "$branch"
           git add index.json
-          if git diff --cached --quiet; then
+          # `generated_at` moves on every run, so compare everything else: a
+          # timestamp is not a publication.
+          if python3 - <<'PY'
+          import json, subprocess, sys
+          new = json.load(open("index.json"))
+          old = json.loads(subprocess.run(
+              ["git", "show", "HEAD:index.json"], capture_output=True, text=True, check=True
+          ).stdout)
+          new.pop("generated_at", None)
+          old.pop("generated_at", None)
+          sys.exit(0 if new == old else 1)
+          PY
+          then
             echo "index.json already records these assets; nothing to publish."
             exit 0
           fi
@@ -170,18 +198,32 @@ jobs:
           # trusting it. Without this, a stale branch would be proposed in place
           # of the entry just generated.
           git push --force origin "HEAD:refs/heads/$branch"
-          # A closed-but-unmerged pull request still answers `gh pr view`, so
-          # the state decides: the published assets stay undiscoverable until an
-          # open pull request carries this index.
-          state="$(gh pr view "$branch" --json state --jq .state 2>/dev/null || echo NONE)"
-          if [ "$state" = "CLOSED" ]; then
-            gh pr reopen "$branch"
-            state=OPEN
-          fi
-          if [ "$state" != "OPEN" ]; then
-            gh pr create \
-              --base main \
-              --head "$branch" \
-              --title "chore: publish plugin catalog entries" \
-              --body "Publishes the reviewed plugin assets built from $SOURCE_COMMIT. The release assets existed and matched these recorded BLAKE3 digests before this pull request was opened. Implements https://github.com/nklmilojevic/sofka/issues/502 as agreed in https://github.com/nklmilojevic/sofka/discussions/501."
-          fi
+          # The state read before the push can have moved while this run was
+          # working, so it is read again here rather than reused. A
+          # closed-but-unmerged pull request still answers `gh pr view`, and the
+          # published assets stay undiscoverable until an open pull request
+          # carries this index.
+          ensure_open_pull_request() {
+            case "$(gh pr view "$branch" --json state --jq .state 2>/dev/null || echo NONE)" in
+              OPEN)
+                echo "a pull request for $branch is already open."
+                ;;
+              MERGED)
+                echo "the pull request for $branch merged while this run was publishing."
+                ;;
+              CLOSED)
+                gh pr reopen "$branch"
+                ;;
+              *)
+                gh pr create \
+                  --base main \
+                  --head "$branch" \
+                  --title "chore: publish plugin catalog entries" \
+                  --body "Publishes the reviewed plugin assets built from $SOURCE_COMMIT. The release assets existed and matched these recorded BLAKE3 digests before this pull request was opened. Implements https://github.com/nklmilojevic/sofka/issues/502 as agreed in https://github.com/nklmilojevic/sofka/discussions/501."
+                ;;
+            esac
+          }
+          # If another run opened or reopened it first, the second read sees
+          # that and succeeds: the pull request existing is the goal, not this
+          # run being the one to create it.
+          ensure_open_pull_request || ensure_open_pull_request
