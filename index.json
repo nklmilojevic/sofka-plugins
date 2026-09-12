@@ -1,7 +1,69 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-12T11:31:11Z",
+  "generated_at": "2026-09-12T11:53:27Z",
   "plugins": [
+    {
+      "id": "chaos-kill",
+      "display_name": "Chaos kill",
+      "description": "Delete pods of the selected workload and measure how long it takes to become ready again.",
+      "tags": [
+        "chaos",
+        "resiliency",
+        "testing",
+        "report"
+      ],
+      "publisher": "vyrti",
+      "repository": "https://github.com/nklmilojevic/sofka-plugins",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sofka": ">=0.26.0",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/865efebc3d292ff34c1f6d0837c974dd42d19e7f/plugins/chaos-kill/README.md",
+          "requirements": [
+            {
+              "name": "kubectl",
+              "install": "Install kubectl from https://kubernetes.io/docs/tasks/tools/"
+            }
+          ],
+          "command": "./adapter",
+          "target": "selection",
+          "output": "report",
+          "mutating": true,
+          "confirm": true,
+          "dangerous": true,
+          "network_load": false,
+          "source_commit": "865efebc3d292ff34c1f6d0837c974dd42d19e7f",
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "x86_64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.0/chaos-kill-0.1.0-x86_64-unknown-linux-gnu.tar.zst",
+              "blake3": "bee03c4e3d0aaab4b18f5782fedf052c89676056b1a6413751d81462067339b0",
+              "size": 258561
+            },
+            {
+              "platform": "aarch64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.0/chaos-kill-0.1.0-aarch64-unknown-linux-gnu.tar.zst",
+              "blake3": "5fcff4b3171796ca7f3de1d0c06447751273548d11431508452d334d1246548b",
+              "size": 238443
+            },
+            {
+              "platform": "x86_64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.0/chaos-kill-0.1.0-x86_64-apple-darwin.tar.zst",
+              "blake3": "e1be57266e67f2f4515fc9f41110fa1df99b512d7ad13d8b4e4c9dde50b3035a",
+              "size": 247942
+            },
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.0/chaos-kill-0.1.0-aarch64-apple-darwin.tar.zst",
+              "blake3": "c21d4943cc7a04cf3c2bd3dd40f565ccca76027a45c7ea082f2258de0d726084",
+              "size": 227654
+            }
+          ]
+        }
+      ]
+    },
     {
       "id": "oha",
       "display_name": "HTTP benchmark",
