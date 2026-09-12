@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-12T11:16:39Z",
+  "generated_at": "2026-09-12T11:21:37Z",
   "plugins": [
     {
       "id": "popeye",
@@ -58,6 +58,68 @@
               "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/popeye-v0.1.0/popeye-0.1.0-aarch64-apple-darwin.tar.zst",
               "blake3": "2532bcca3c72f1d5d3e1e3d2c5e8dc5f18c9289827beda33229b751223a5a2c1",
               "size": 232404
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trivy",
+      "display_name": "Trivy scan",
+      "description": "Scan the active context with Trivy and report vulnerabilities, misconfigurations, and secrets.",
+      "tags": [
+        "security",
+        "vulnerabilities",
+        "report",
+        "audit"
+      ],
+      "publisher": "vyrti",
+      "repository": "https://github.com/nklmilojevic/sofka-plugins",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sofka": ">=0.26.0",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/bfa4bf6b7c99e346d410534bef7e95a98faba4b7/plugins/trivy/README.md",
+          "requirements": [
+            {
+              "name": "trivy",
+              "install": "Install Trivy from https://trivy.dev/latest/getting-started/installation/"
+            }
+          ],
+          "command": "./adapter",
+          "target": "context",
+          "output": "report",
+          "mutating": false,
+          "confirm": false,
+          "dangerous": false,
+          "network_load": false,
+          "source_commit": "bfa4bf6b7c99e346d410534bef7e95a98faba4b7",
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "x86_64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/trivy-v0.1.0/trivy-0.1.0-x86_64-unknown-linux-gnu.tar.zst",
+              "blake3": "0c9687838ccab0872faa6d895a67e09628ba627c1774b67420a445387261c6fe",
+              "size": 271866
+            },
+            {
+              "platform": "aarch64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/trivy-v0.1.0/trivy-0.1.0-aarch64-unknown-linux-gnu.tar.zst",
+              "blake3": "4d72c9e953ab5b1501fd0fee5a793e12b8d949a852253c8f9a0c8c5e18f64396",
+              "size": 251970
+            },
+            {
+              "platform": "x86_64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/trivy-v0.1.0/trivy-0.1.0-x86_64-apple-darwin.tar.zst",
+              "blake3": "d7a9670ac0fa397f3db2d0f4b15bb13109a032d960441854f26c18a2586fc376",
+              "size": 259173
+            },
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/trivy-v0.1.0/trivy-0.1.0-aarch64-apple-darwin.tar.zst",
+              "blake3": "2bdaa4ced80d405b5c905d72032ed89dd7bafc6941842e73afc0fb370da55e97",
+              "size": 240303
             }
           ]
         }
