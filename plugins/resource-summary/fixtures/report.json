@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "title": "Resource summary",
+  "sections": [
+    {
+      "title": "Selection",
+      "columns": ["Field", "Value"],
+      "rows": [
+        ["Context", "development"],
+        ["Kind", "Pod"],
+        ["Namespace", "default"],
+        ["Name", "api"]
+      ]
+    },
+    {
+      "title": "Labels",
+      "columns": ["Label", "Value"],
+      "rows": [["app", "api"]]
+    }
+  ]
+}
