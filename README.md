@@ -37,9 +37,16 @@ version.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the review and withdrawal rules.
 
-Add a fine-grained `CATALOG_GITHUB_TOKEN` Actions secret with Contents and Pull
-requests read/write access to this repository. It lets the post-merge workflow
-publish releases and open an index pull request whose event runs normal CI.
+Publication uses the automatic `GITHUB_TOKEN` with Contents and Pull requests
+write permissions. No separate token secret is required. In the repository's
+Settings > Actions > General > Workflow permissions, enable **Allow GitHub
+Actions to create and approve pull requests**.
+
+When the workflow creates or updates a catalog pull request, a maintainer with
+write access must select **Approve workflows to run** on that pull request.
+Wait for CI to pass, then review and merge the catalog change. See
+[GitHub's token documentation](https://docs.github.com/en/actions/concepts/security/github_token).
+
 Protect `main`, require the CI checks and code-owner review, and restrict
 workflow changes to maintainers. Pull-request jobs have read-only permissions
 and receive no publication credentials.
