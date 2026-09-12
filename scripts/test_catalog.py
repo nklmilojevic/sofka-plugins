@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import contextlib
 import io
 import zstandard
 import json
@@ -305,6 +306,32 @@ def check_selection() -> None:
         subprocess.check_output = real
 
 
+def check_manual_publication() -> None:
+    original_index = catalog.INDEX
+    try:
+        with tempfile.TemporaryDirectory() as directory:
+            catalog.INDEX = pathlib.Path(directory) / "index.json"
+            catalog.INDEX.write_text(json.dumps({"plugins": []}), encoding="utf-8")
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                catalog.manual_publication(argparse.Namespace(plugin="popeye"))
+            plan = json.loads(output.getvalue())
+            expected = [
+                {"plugin": "popeye", "target": target, "os": catalog.TARGETS[target]}
+                for target in catalog.publication("popeye")["platforms"]
+            ]
+            if plan != {"plugins": ["popeye"], "matrix": {"include": expected}}:
+                FAILURES.append("manual publication did not select only Popeye's platforms")
+            for plugin in ("", "missing-plugin", "../popeye", "popeye;echo injected"):
+                rejects(f"manual publication of {plugin!r}", lambda plugin=plugin: catalog.manual_publication(argparse.Namespace(plugin=plugin)))
+            version = catalog.publication("popeye")["version"]
+            for status in ("active", "withdrawn"):
+                catalog.INDEX.write_text(json.dumps({"plugins": [{"id": "popeye", "versions": [{"version": version, "status": status}]}]}), encoding="utf-8")
+                rejects(f"manual publication of an {status} catalog version", lambda: catalog.manual_publication(argparse.Namespace(plugin="popeye")))
+    finally:
+        catalog.INDEX = original_index
+
+
 def check_packaging() -> None:
     """Archives must be byte-identical across runs and carry only the files and
     modes the installer expects."""
@@ -531,6 +558,7 @@ def main() -> None:
     check_manifest_rules()
     check_source_rules()
     check_selection()
+    check_manual_publication()
     check_packaging()
     check_index_generation()
     check_immutability()

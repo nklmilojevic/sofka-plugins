@@ -561,6 +561,18 @@ def changed_plugins(base: str, head: str, mode: str) -> list[str]:
 
 def changes(args: argparse.Namespace) -> None:
     plugins = changed_plugins(args.base, args.head, args.mode)
+    print_matrix(plugins)
+
+
+def manual_publication(args: argparse.Namespace) -> None:
+    check(args.plugin in plugin_ids(), f"unknown plugin: {args.plugin}")
+    version = publication(args.plugin)["version"]
+    published = releases(read_json(INDEX))
+    check((args.plugin, version) not in published, f"{args.plugin}@{version} is already published; increment its version")
+    print_matrix([args.plugin])
+
+
+def print_matrix(plugins: list[str]) -> None:
     include = []
     for plugin in plugins:
         metadata = publication(plugin)
@@ -708,6 +720,8 @@ def main() -> None:
     change.add_argument("--base", required=True)
     change.add_argument("--head", required=True)
     change.add_argument("--mode", choices=("test", "publish"), required=True)
+    manual = commands.add_parser("manual-publication")
+    manual.add_argument("--plugin", required=True)
     unpublished = commands.add_parser("assert-unpublished")
     unpublished.add_argument("--base", required=True)
     unpublished.add_argument("--head", required=True)
@@ -738,6 +752,8 @@ def main() -> None:
             validate_sources(index)
         elif args.command == "changes":
             changes(args)
+        elif args.command == "manual-publication":
+            manual_publication(args)
         elif args.command == "assert-unpublished":
             assert_unpublished(args)
         elif args.command == "version":

@@ -37,6 +37,15 @@ version.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the review and withdrawal rules.
 
+To recover a failed publication with the current workflow, open Actions >
+Publish changed plugins > Run workflow. Select `main` and enter one plugin ID,
+such as `popeye`. The workflow validates and builds that package, publishes its
+archives, and opens a catalog PR. Unknown IDs and versions already in the
+catalog are rejected. Manual runs on other branches are skipped.
+
+Rerunning an old run uses its original commit and workflow. Use the manual
+trigger when recovery needs a workflow fix that was merged later.
+
 Publication uses the automatic `GITHUB_TOKEN` with Contents and Pull requests
 write permissions. No separate token secret is required. In the repository's
 Settings > Actions > General > Workflow permissions, enable **Allow GitHub
