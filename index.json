@@ -1,5 +1,67 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-11T00:00:00Z",
-  "plugins": []
+  "generated_at": "2026-09-12T11:16:39Z",
+  "plugins": [
+    {
+      "id": "popeye",
+      "display_name": "Popeye scan",
+      "description": "Scan the active context with Popeye and report findings by linter.",
+      "tags": [
+        "diagnostics",
+        "report",
+        "audit"
+      ],
+      "publisher": "vyrti",
+      "repository": "https://github.com/nklmilojevic/sofka-plugins",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sofka": ">=0.26.0",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/ccd96b99e1e6478ff76c9a85298aade0a22b29a5/plugins/popeye/README.md",
+          "requirements": [
+            {
+              "name": "popeye",
+              "install": "Install Popeye from https://github.com/derailed/popeye#installation"
+            }
+          ],
+          "command": "./adapter",
+          "target": "context",
+          "output": "report",
+          "mutating": false,
+          "confirm": false,
+          "dangerous": false,
+          "network_load": false,
+          "source_commit": "ccd96b99e1e6478ff76c9a85298aade0a22b29a5",
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "x86_64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/popeye-v0.1.0/popeye-0.1.0-x86_64-unknown-linux-gnu.tar.zst",
+              "blake3": "085559db411c1b5675e4c997ff0bc8d232adc6353bbd5dd662687ef0862b9bb6",
+              "size": 265044
+            },
+            {
+              "platform": "aarch64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/popeye-v0.1.0/popeye-0.1.0-aarch64-unknown-linux-gnu.tar.zst",
+              "blake3": "e19858c88fc64652cab8ec6c2468cbdc7172732cd9d178585d34779766c118db",
+              "size": 243862
+            },
+            {
+              "platform": "x86_64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/popeye-v0.1.0/popeye-0.1.0-x86_64-apple-darwin.tar.zst",
+              "blake3": "a9c5b321930c742fe1c42d4114b78ed8665c99d745f6162d8abbb39ed0808486",
+              "size": 252707
+            },
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/popeye-v0.1.0/popeye-0.1.0-aarch64-apple-darwin.tar.zst",
+              "blake3": "2532bcca3c72f1d5d3e1e3d2c5e8dc5f18c9289827beda33229b751223a5a2c1",
+              "size": 232404
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
