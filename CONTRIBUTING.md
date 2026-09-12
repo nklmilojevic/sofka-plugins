@@ -18,8 +18,10 @@ metadata, and workflow changes. Tests must use fixtures and must not need
 production credentials.
 
 Package IDs use lowercase ASCII letters, digits, and hyphens. Published versions
-are immutable: CI compares every existing `index.json` record against the base
-branch and rejects any change to one except a withdrawal. Increment the semantic
+are immutable: CI compares the proposed merge result against the base branch
+and rejects any change to an existing `index.json` record except a withdrawal.
+Both plugin selection and catalog checks use this merge result, so an older PR
+branch does not report newer base-branch entries as deleted. Increment the semantic
 package version for every source or manifest change. Keep package versions, the
 catalog schema version, and `plugin.toml` schema versions independent.
 

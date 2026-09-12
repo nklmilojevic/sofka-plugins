@@ -25,7 +25,7 @@ jobs:
       - id: changes
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
+          HEAD: ${{ github.sha }}
         run: |
           changes="$(python3 scripts/catalog.py changes --base "$BASE" --head "$HEAD" --mode test)"
           echo "plugins=$(jq -c .plugins <<<"$changes")" >> "$GITHUB_OUTPUT"
@@ -51,7 +51,7 @@ jobs:
       - name: Reject replacement or modification of a published version
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
+          HEAD: ${{ github.sha }}
         run: python3 scripts/catalog.py assert-unpublished --base "$BASE" --head "$HEAD"
       # No workspace member lives outside plugins/, so a change that selects no
       # plugin has no Rust to compile.
