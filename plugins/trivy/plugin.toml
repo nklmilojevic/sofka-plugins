@@ -1,0 +1,38 @@
+schema_version = 1
+
+[package]
+version = "0.1.0"
+authors = ["vyrti"]
+license = "MIT OR Apache-2.0"
+description = "Scan the active context with Trivy and report vulnerabilities, misconfigurations, and secrets."
+repository = "https://github.com/nklmilojevic/sofka-plugins"
+readme = "README.md"
+sofka = ">=0.26.0"
+platforms = [
+  "x86_64-unknown-linux-gnu",
+  "aarch64-unknown-linux-gnu",
+  "x86_64-apple-darwin",
+  "aarch64-apple-darwin",
+]
+tags = ["security", "vulnerabilities", "report", "audit"]
+
+[plugin]
+name = "Trivy scan"
+palette = "trivy"
+command = "./adapter"
+args = []
+requires = ["trivy"]
+install = "Install Trivy from https://trivy.dev/latest/getting-started/installation/"
+output = "report"
+target = "context"
+mutating = false
+timeout = "30m"
+
+[plugin.inputs.scan]
+type = "string"
+default = "all"
+choices = ["all", "misconfig"]
+
+[plugin.inputs.report]
+type = "string"
+default = ""
