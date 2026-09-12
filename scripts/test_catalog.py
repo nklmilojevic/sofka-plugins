@@ -308,6 +308,48 @@ def check_selection() -> None:
         subprocess.check_output = real
 
 
+def check_pr_merge_catalog() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        repository = pathlib.Path(directory)
+        run = lambda *argv: subprocess.run(argv, cwd=repository, check=True, capture_output=True)
+        run("git", "init", "--quiet", "-b", "main")
+        run("git", "config", "user.email", "catalog@example.invalid")
+        run("git", "config", "user.name", "catalog")
+        initial = commit(repository, {"plugins": []}, "empty catalog")
+        run("git", "switch", "-c", "feature")
+        (repository / "README.md").write_text("Plugin documentation.\n", encoding="utf-8")
+        run("git", "add", "README.md")
+        run("git", "-c", "commit.gpgsign=false", "commit", "-m", "documentation")
+        feature = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repository, text=True).strip()
+        run("git", "switch", "main")
+        plugin = repository / "plugins" / "resource-summary"
+        plugin.mkdir(parents=True)
+        (plugin / "plugin.toml").write_text(MANIFEST.read_text(encoding="utf-8"), encoding="utf-8")
+        run("git", "add", "plugins")
+        published = json.loads(FIXTURE.read_text(encoding="utf-8"))
+        base = commit(repository, published, "publish after feature branch")
+        run("git", "-c", "commit.gpgsign=false", "merge", "--no-ff", "feature", "-m", "proposed merge")
+        merged = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repository, text=True).strip()
+
+        original = catalog.ROOT, catalog.PLUGINS, catalog.INDEX
+        catalog.ROOT, catalog.PLUGINS, catalog.INDEX = repository, repository / "plugins", repository / "index.json"
+        try:
+            rejects("the outdated branch catalog", lambda: catalog.assert_immutable(base, feature))
+            accepts("the merged catalog with newer base entries", lambda: catalog.assert_unpublished(argparse.Namespace(base=base, head=merged)))
+            if catalog.changed_plugins(base, merged, "publish"):
+                FAILURES.append("the proposed merge selected a plugin added only on the base branch")
+            if catalog.index_at(initial)["plugins"]:
+                FAILURES.append("the regression branch did not start with an empty catalog")
+            removed = commit(repository, {"plugins": []}, "delete published entries")
+            rejects("a real catalog deletion after merge", lambda: catalog.assert_unpublished(argparse.Namespace(base=base, head=removed)))
+            changed = copy.deepcopy(published)
+            changed["plugins"][0]["versions"][0]["artifacts"][0]["blake3"] = "9" * 64
+            repointed = commit(repository, changed, "change published digest")
+            rejects("a real digest change after merge", lambda: catalog.assert_unpublished(argparse.Namespace(base=base, head=repointed)))
+        finally:
+            catalog.ROOT, catalog.PLUGINS, catalog.INDEX = original
+
+
 def check_manual_publication() -> None:
     original_index = catalog.INDEX
     try:
@@ -560,6 +602,7 @@ def main() -> None:
     check_manifest_rules()
     check_source_rules()
     check_selection()
+    check_pr_merge_catalog()
     check_manual_publication()
     check_packaging()
     check_index_generation()
