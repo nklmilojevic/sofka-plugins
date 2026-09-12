@@ -1,0 +1,31 @@
+schema_version = 1
+
+[package]
+version = "0.1.0"
+authors = ["nklmilojevic"]
+license = "MIT OR Apache-2.0"
+description = "Show identity, context, and optionally labels for the selected Kubernetes resource."
+repository = "https://github.com/nklmilojevic/sofka-plugins"
+readme = "README.md"
+sofka = ">=0.26.0"
+platforms = [
+  "x86_64-unknown-linux-gnu",
+  "aarch64-unknown-linux-gnu",
+  "x86_64-apple-darwin",
+  "aarch64-apple-darwin",
+]
+tags = ["example", "report", "resources"]
+
+[plugin]
+name = "Resource summary"
+palette = "resource-summary"
+command = "./adapter"
+args = []
+requires = []
+output = "report"
+mutating = false
+timeout = "10s"
+
+[plugin.inputs.detail]
+type = "boolean"
+default = "false"

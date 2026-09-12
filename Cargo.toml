@@ -1,0 +1,24 @@
+[workspace]
+members = ["plugins/resource-summary"]
+resolver = "3"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+# Adapters are small, short-lived processes whose binaries are downloaded over
+# the network, so both size and startup matter and build time does not.
+lto = "thin"
+# One codegen unit: these crates are a few hundred lines, so the build cost is
+# noise and the optimizer sees the whole adapter at once.
+codegen-units = 1
+# An adapter reads stdin, writes a report, and exits. It holds no lock, owns no
+# terminal, and runs no destructor worth unwinding for — aborting instead drops
+# every landing pad from the binary.
+panic = "abort"
+strip = true

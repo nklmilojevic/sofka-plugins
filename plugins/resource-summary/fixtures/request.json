@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "context": "development",
+  "cluster": "development",
+  "namespace": "default",
+  "resource": "pods",
+  "name": "api",
+  "filter": "",
+  "inputs": { "detail": "true" },
+  "object": {
+    "apiVersion": "v1",
+    "kind": "Pod",
+    "metadata": {
+      "name": "api",
+      "namespace": "default",
+      "labels": { "app": "api" }
+    }
+  },
+  "forward": null
+}

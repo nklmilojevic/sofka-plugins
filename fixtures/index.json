@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-11T00:00:00Z",
+  "plugins": [
+    {
+      "id": "resource-summary",
+      "display_name": "Resource summary",
+      "description": "Example published catalog entry.",
+      "tags": ["example", "report"],
+      "publisher": "sofka maintainers",
+      "repository": "https://github.com/nklmilojevic/sofka-plugins",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sofka": ">=0.26.0, <1.0.0",
+          "source_commit": "0000000000000000000000000000000000000000",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/0000000000000000000000000000000000000000/plugins/resource-summary/README.md",
+          "requirements": [],
+          "command": "./resource-summary",
+          "target": "selection",
+          "output": "report",
+          "mutating": false,
+          "confirm": false,
+          "dangerous": false,
+          "network_load": false,
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/resource-summary-v0.1.0/resource-summary-0.1.0-aarch64-apple-darwin.tar.zst",
+              "blake3": "0000000000000000000000000000000000000000000000000000000000000000",
+              "size": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
