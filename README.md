@@ -9,6 +9,7 @@ GitHub Release assets and are never committed to Git.
 
 | Package                                        | Needs                                                  |
 | ---------------------------------------------- | ------------------------------------------------------ |
+| [`oha`](plugins/oha)                           | [oha](https://github.com/hatoo/oha) on `PATH`          |
 | [`popeye`](plugins/popeye)                     | [Popeye](https://github.com/derailed/popeye) on `PATH` |
 | [`trivy`](plugins/trivy)                       | [Trivy](https://trivy.dev) on `PATH`                   |
 | [`resource-summary`](plugins/resource-summary) | nothing                                                |

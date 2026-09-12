@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "context": "development",
+  "cluster": "development",
+  "namespace": "apps",
+  "resource": "services",
+  "name": "web",
+  "filter": "",
+  "inputs": {
+    "port": "80",
+    "duration": "10s",
+    "connections": "20",
+    "rate": "100",
+    "path": "/",
+    "report": "plugins/oha/fixtures/scan.json"
+  },
+  "object": null,
+  "forward": { "host": "127.0.0.1", "local_port": 32123, "remote_port": 80 }
+}

@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "sections": [
+    {
+      "columns": [
+        "Field",
+        "Value"
+      ],
+      "rows": [
+        [
+          "Target",
+          "services/web"
+        ],
+        [
+          "Namespace",
+          "apps"
+        ],
+        [
+          "URL",
+          "http://127.0.0.1:32123/"
+        ],
+        [
+          "Forwarded",
+          "32123 -> 80"
+        ],
+        [
+          "Requested",
+          "10s, 20 connections, 100 requests/s"
+        ],
+        [
+          "Requests",
+          "21,645"
+        ],
+        [
+          "Success",
+          "100.00%"
+        ],
+        [
+          "Requests/sec",
+          "7205.7"
+        ],
+        [
+          "Elapsed",
+          "3.00s"
+        ],
+        [
+          "Fastest",
+          "218µs"
+        ],
+        [
+          "Average",
+          "1.4ms"
+        ],
+        [
+          "Slowest",
+          "577.4ms"
+        ],
+        [
+          "p50",
+          "635µs"
+        ],
+        [
+          "p90",
+          "1.1ms"
+        ],
+        [
+          "p95",
+          "1.4ms"
+        ],
+        [
+          "p99",
+          "31.0ms"
+        ],
+        [
+          "Data",
+          "21.1 MiB (1.0 KiB per request)"
+        ]
+      ],
+      "title": "Summary"
+    },
+    {
+      "columns": [
+        "Code",
+        "Responses"
+      ],
+      "rows": [
+        [
+          "200",
+          "21,636"
+        ]
+      ],
+      "title": "Status codes"
+    },
+    {
+      "columns": [
+        "Error",
+        "Count"
+      ],
+      "rows": [
+        [
+          "aborted due to deadline",
+          "9"
+        ]
+      ],
+      "title": "Errors"
+    }
+  ],
+  "title": "HTTP benchmark"
+}

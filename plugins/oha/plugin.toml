@@ -1,0 +1,62 @@
+schema_version = 1
+
+[package]
+version = "0.1.0"
+authors = ["vyrti"]
+license = "MIT OR Apache-2.0"
+description = "Benchmark the selected pod or service over a managed port-forward with oha."
+repository = "https://github.com/nklmilojevic/sofka-plugins"
+readme = "README.md"
+sofka = ">=0.26.0"
+platforms = [
+  "x86_64-unknown-linux-gnu",
+  "aarch64-unknown-linux-gnu",
+  "x86_64-apple-darwin",
+  "aarch64-apple-darwin",
+]
+tags = ["benchmark", "http", "load", "report"]
+
+[plugin]
+name = "HTTP benchmark"
+palette = "oha"
+command = "./adapter"
+args = []
+requires = ["oha"]
+install = "Install oha from https://github.com/hatoo/oha#installation"
+output = "report"
+target = "selection"
+scopes = ["pods", "services"]
+# Sofka opens the forward and tells the adapter which local port to hit.
+port_forward = "${input.port}"
+mutating = false
+# This one really does generate traffic: sofka confirms before every run and
+# refuses in read-only mode.
+network_load = true
+timeout = "6m"
+
+[plugin.inputs.port]
+type = "integer"
+default = "80"
+min = 1
+max = 65535
+
+[plugin.inputs.duration]
+type = "duration"
+default = "10s"
+max = 300
+
+[plugin.inputs.connections]
+type = "integer"
+default = "20"
+min = 1
+max = 1000
+
+[plugin.inputs.rate]
+type = "integer"
+default = "100"
+min = 1
+max = 10000
+
+[plugin.inputs.path]
+type = "string"
+default = "/"
