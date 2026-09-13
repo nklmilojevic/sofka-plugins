@@ -601,6 +601,30 @@ struct Outcome {
 }
 
 fn run(request: &Request, cluster: &dyn Cluster) -> Result<Value, String> {
+    let mut remaining = 64 * 1024;
+    run_with_activity(request, cluster, &mut |message| {
+        if remaining == 0 {
+            return;
+        }
+        let line = format!("{message}\n");
+        if line.len() > remaining {
+            let _ = std::io::stderr()
+                .write_all(b"[chaos-kill activity truncated; recovery measurement continues]\n");
+            remaining = 0;
+        } else {
+            remaining -= line.len();
+            // A diagnostic write failure must not abandon recovery measurement
+            // after a pod deletion has already been requested.
+            let _ = std::io::stderr().write_all(line.as_bytes());
+        }
+    })
+}
+
+fn run_with_activity(
+    request: &Request,
+    cluster: &dyn Cluster,
+    activity: &mut dyn FnMut(&str),
+) -> Result<Value, String> {
     if request.schema_version != 1 {
         return Err("unsupported request schema_version".into());
     }
@@ -634,6 +658,7 @@ fn run(request: &Request, cluster: &dyn Cluster) -> Result<Value, String> {
     }
     let options = Options::from(&request.inputs)?;
     let selector = selector(object)?;
+    activity("Reading workload status and checking pod ownership");
     let workload = cluster.workload(&scope)?;
     if workload.desired <= 0 {
         return Err(format!(
@@ -660,6 +685,10 @@ fn run(request: &Request, cluster: &dyn Cluster) -> Result<Value, String> {
     let killed: Vec<String> = victims.iter().map(|pod| pod.name.clone()).collect();
 
     if options.dry_run {
+        activity(&format!(
+            "Dry run: selected {} pod(s); nothing will be deleted",
+            killed.len()
+        ));
         return Ok(report(
             &kind,
             &scope,
@@ -683,6 +712,7 @@ fn run(request: &Request, cluster: &dyn Cluster) -> Result<Value, String> {
             pod.name
         ));
     }
+    activity("Verifying selected pod identities before deletion");
     confirm_identities(cluster, &scope, &selector, &victims)?;
     let mut outcome = Outcome {
         killed,
@@ -693,11 +723,20 @@ fn run(request: &Request, cluster: &dyn Cluster) -> Result<Value, String> {
         ready: workload.ready,
         polls: 0,
     };
+    activity(&format!(
+        "Requesting deletion of {} pod(s)",
+        outcome.killed.len()
+    ));
     if let Err(error) = cluster.delete(&scope, &outcome.killed) {
+        activity("Deletion failed; recovery measurement was not started");
         outcome.measurement_error = Some(error);
         return Ok(report(&kind, &scope, &selector, &options, &outcome));
     }
     outcome.delete_succeeded = true;
+    activity(&format!(
+        "Deletion request accepted; waiting up to {}s for replacement readiness",
+        options.wait.as_secs()
+    ));
     let started = Instant::now();
     while started.elapsed() < options.wait {
         cluster.sleep(POLL_INTERVAL);
@@ -710,6 +749,13 @@ fn run(request: &Request, cluster: &dyn Cluster) -> Result<Value, String> {
             }
         };
         (outcome.desired, outcome.ready) = (state.desired, state.ready);
+        activity(&format!(
+            "Recovery: {} / {} controller replicas ready; {:.1}s elapsed / {}s deadline",
+            outcome.ready,
+            outcome.desired,
+            started.elapsed().as_secs_f64(),
+            options.wait.as_secs()
+        ));
         if outcome.desired > 0 && outcome.ready >= outcome.desired {
             let pods = match cluster.pods(&scope, &selector) {
                 Ok(pods) => pods,
@@ -720,9 +766,16 @@ fn run(request: &Request, cluster: &dyn Cluster) -> Result<Value, String> {
             };
             if replacements_ready(&pods, &owners, &victims, outcome.desired) {
                 outcome.recovered = Some(started.elapsed());
+                activity("Replacement pods verified ready; workload recovered");
                 break;
             }
+            activity("Controller reports ready; still waiting for verified replacement pods");
         }
+    }
+    if outcome.measurement_error.is_some() {
+        activity("Recovery measurement failed; see report for details");
+    } else if outcome.recovered.is_none() {
+        activity("Recovery deadline reached without verified recovery");
     }
     Ok(report(&kind, &scope, &selector, &options, &outcome))
 }
@@ -950,7 +1003,21 @@ mod tests {
     #[test]
     fn a_dry_run_deletes_nothing() {
         let fake = Fake::new(vec![(3, 3)]);
-        let report = run(&request(), &fake).unwrap();
+        let mut messages = Vec::new();
+        let report = run_with_activity(&request(), &fake, &mut |line| {
+            messages.push(line.to_string())
+        })
+        .unwrap();
+        assert!(
+            messages
+                .iter()
+                .any(|line| line.contains("Dry run: selected 2 pod(s)"))
+        );
+        assert!(
+            !messages
+                .iter()
+                .any(|line| line.contains("Requesting deletion"))
+        );
         assert!(fake.deleted.borrow().is_empty(), "a dry run deleted pods");
         assert_eq!(value(&report, "Verdict"), "dry run — nothing was deleted");
         assert_eq!(value(&report, "Would kill"), "2");
@@ -1003,7 +1070,19 @@ mod tests {
         request.inputs.remove("pods");
         // Whole before the delete, then degraded, still degraded, whole again.
         let fake = Fake::new(vec![(3, 3), (3, 1), (3, 2), (3, 3)]);
-        let report = run(&request, &fake).unwrap();
+        let mut messages = Vec::new();
+        let report =
+            run_with_activity(&request, &fake, &mut |line| messages.push(line.to_string()))
+                .unwrap();
+        for ready in [1, 2, 3] {
+            assert!(messages.iter().any(|line| {
+                line.contains(&format!("Recovery: {ready} / 3 controller replicas ready"))
+            }));
+        }
+        assert_eq!(
+            messages.last().unwrap(),
+            "Replacement pods verified ready; workload recovered"
+        );
         assert_eq!(*fake.deleted.borrow(), ["web-oldest", "web-middle"]);
         assert!(value(&report, "Verdict").starts_with("recovered in"));
         assert_eq!(value(&report, "Ready replicas"), "3");
@@ -1038,8 +1117,24 @@ mod tests {
         // The async delete returned, but the pod list and controller readiness
         // are both still the old observation.
         let fake = Fake::with_after_delete(vec![(3, 3)], serde_json::from_str(PODS).unwrap());
-
-        let report = run(&request, &fake).unwrap();
+        let mut messages = Vec::new();
+        let report =
+            run_with_activity(&request, &fake, &mut |line| messages.push(line.to_string()))
+                .unwrap();
+        assert!(
+            messages
+                .iter()
+                .any(|line| line.contains("still waiting for verified replacement pods"))
+        );
+        assert!(
+            !messages
+                .iter()
+                .any(|line| line.contains("workload recovered"))
+        );
+        assert_eq!(
+            messages.last().unwrap(),
+            "Recovery deadline reached without verified recovery"
+        );
 
         let verdict = value(&report, "Verdict");
         assert!(verdict.contains("DID NOT RECOVER"), "{verdict}");

@@ -6,6 +6,8 @@
 //! in the request, so the adapter never shells out to kubectl and never has to
 //! guess whether an address is routable from here.
 
+mod activity;
+
 use std::collections::BTreeMap;
 use std::ffi::OsStr;
 use std::io::{Read, Write as _};
@@ -232,7 +234,10 @@ fn benchmark(url: &str, options: &Options) -> Result<Report, String> {
         .stderr
         .take()
         .ok_or_else(|| "failed to capture oha stderr".to_string())?;
-    let errors = std::thread::spawn(move || bounded_read(stderr, STDERR_MAX_BYTES));
+    let progress = activity::Progress::start(options.duration, options.connections, options.rate);
+    let errors = std::thread::spawn(move || {
+        activity::relay_stderr(stderr, std::io::stderr(), STDERR_MAX_BYTES)
+    });
     let parsed = parse(&mut stdout);
     if parsed.is_err() {
         bounded_read(&mut stdout, STDERR_MAX_BYTES);
@@ -241,9 +246,19 @@ fn benchmark(url: &str, options: &Options) -> Result<Report, String> {
     let status = child
         .wait()
         .map_err(|e| format!("failed while waiting for oha: {e}"))?;
-    let stderr = errors.join().unwrap_or_default();
+    let progress_result = progress.finish();
+    let stderr = errors
+        .join()
+        .map_err(|_| "oha diagnostic reader panicked".to_string())?
+        .map_err(|e| format!("cannot read or forward oha diagnostics: {e}"))?;
+    progress_result.map_err(|e| format!("cannot write oha activity: {e}"))?;
     match parsed {
-        Ok(report) if status.success() => Ok(report),
+        Ok(report) if status.success() => {
+            std::io::stderr()
+                .write_all(b"oha finished; preparing report\n")
+                .map_err(|e| format!("cannot write oha activity: {e}"))?;
+            Ok(report)
+        }
         Ok(_) => Err(run_error(None, &status.to_string(), &stderr)),
         Err(error) => Err(run_error(Some(error), &status.to_string(), &stderr)),
     }

@@ -218,8 +218,11 @@ fn status(request: &Request) -> Result<Value, String> {
     let text = match replay(request)? {
         Some(text) => text,
         None => {
+            eprintln!("Reading certificate status with cmctl");
             let args = arguments(&["status", "certificate"], request);
-            execute_tool(CMCTL, &args, CMCTL_INSTALL)?
+            let output = execute_tool(CMCTL, &args, CMCTL_INSTALL)?;
+            eprintln!("Certificate status collected; preparing report");
+            output
         }
     };
     Ok(render_status(request, &target, &text))
@@ -229,7 +232,14 @@ fn inspect(request: &Request) -> Result<Value, String> {
     let target = tls_secret(request)?;
     let text = match replay(request)? {
         Some(text) => text,
-        None => describe_leaf(&certificate_pem(request, &target)?)?,
+        None => {
+            eprintln!("Reading the selected certificate for inspection");
+            let pem = certificate_pem(request, &target)?;
+            eprintln!("Inspecting leaf certificate metadata");
+            let output = describe_leaf(&pem)?;
+            eprintln!("Certificate inspection finished; preparing report");
+            output
+        }
     };
     Ok(render_inspect(request, &target, &text))
 }
@@ -238,9 +248,12 @@ fn renew(request: &Request) -> Result<Value, String> {
     let target = certificate(request)?;
     let args = arguments(&["renew"], request);
     if dry_run(request) {
+        eprintln!("Dry run: no certificate renewal will be requested");
         return Ok(render_renew(request, &target, &args, None));
     }
+    eprintln!("Requesting certificate renewal with cmctl");
     let output = execute_tool(CMCTL, &args, CMCTL_INSTALL)?;
+    eprintln!("Renewal request submitted; new certificate issuance is not verified");
     Ok(render_renew(request, &target, &args, Some(&output)))
 }
 
@@ -301,7 +314,16 @@ struct Captured {
 /// Read to EOF, keeping at most `limit` bytes. Reading past the limit keeps
 /// the child from getting SIGPIPE on a closed pipe; the caller decides what a
 /// truncated capture means.
-fn bounded_read(mut reader: impl Read, limit: usize) -> std::io::Result<Captured> {
+fn bounded_read(reader: impl Read, limit: usize) -> std::io::Result<Captured> {
+    capture(reader, limit, None)
+}
+
+fn capture(
+    mut reader: impl Read,
+    limit: usize,
+    mut forward: Option<&mut dyn std::io::Write>,
+) -> std::io::Result<Captured> {
+    let mut write_error = None;
     let mut captured = Captured {
         bytes: Vec::new(),
         truncated: false,
@@ -316,11 +338,28 @@ fn bounded_read(mut reader: impl Read, limit: usize) -> std::io::Result<Captured
         };
         let keep = read.min(limit.saturating_sub(captured.bytes.len()));
         captured.bytes.extend_from_slice(&chunk[..keep]);
+        if let Some(writer) = forward.as_mut()
+            && write_error.is_none()
+        {
+            let result = (|| {
+                writer.write_all(&chunk[..keep])?;
+                if keep < read && !captured.truncated {
+                    writer.write_all(
+                        b"\n[cert-manager diagnostics truncated; operation continues]\n",
+                    )?;
+                }
+                writer.flush()
+            })();
+            write_error = result.err();
+        }
         if keep < read {
             captured.truncated = true;
         }
     }
-    Ok(captured)
+    match write_error {
+        Some(error) => Err(error),
+        None => Ok(captured),
+    }
 }
 
 /// Run `program` with `args`, arguments passed separately. Returns stdout on
@@ -345,7 +384,8 @@ fn execute_tool(program: &str, args: &[String], install: &str) -> Result<String,
         .ok_or_else(|| format!("failed to capture {program} stderr"))?;
     // Drain stderr on its own thread so a chatty tool cannot block on a full
     // pipe while this process waits on stdout.
-    let errors = std::thread::spawn(move || bounded_read(stderr, STDERR_MAX_BYTES));
+    let errors =
+        std::thread::spawn(move || capture(stderr, STDERR_MAX_BYTES, Some(&mut std::io::stderr())));
     let output = bounded_read(stdout, OUTPUT_MAX_BYTES);
     let status = child
         .wait()
@@ -389,6 +429,7 @@ fn certificate_pem(request: &Request, target: &Target<'_>) -> Result<Vec<u8>, St
             ));
         }
         None => {
+            eprintln!("Reading the selected TLS Secret with kubectl");
             let mut args = arguments(&["get", "secret"], request);
             args.extend(["--output".to_string(), "json".to_string()]);
             let json = execute_tool(KUBECTL, &args, KUBECTL_INSTALL)?;
@@ -1455,6 +1496,41 @@ mod tests {
         }
         request.inputs.remove("dry_run");
         assert!(!dry_run(&request));
+    }
+
+    #[test]
+    fn live_diagnostics_are_bounded_and_drain_after_writer_failure() {
+        let mut input = std::io::Cursor::new(vec![b'x'; 100_000]);
+        let mut forwarded = Vec::new();
+        let captured = capture(&mut input, 1024, Some(&mut forwarded)).unwrap();
+        assert!(captured.truncated);
+        assert_eq!(captured.bytes.len(), 1024);
+        assert_eq!(input.position(), 100_000);
+        assert!(forwarded.len() < 1100);
+        assert_eq!(
+            String::from_utf8(forwarded)
+                .unwrap()
+                .matches("truncated")
+                .count(),
+            1
+        );
+        struct Broken;
+        impl std::io::Write for Broken {
+            fn write(&mut self, _: &[u8]) -> std::io::Result<usize> {
+                Err(std::io::Error::other("write failed"))
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+        input.set_position(0);
+        assert_eq!(
+            capture(&mut input, 1024, Some(&mut Broken))
+                .unwrap_err()
+                .to_string(),
+            "write failed"
+        );
+        assert_eq!(input.position(), 100_000);
     }
 
     #[test]

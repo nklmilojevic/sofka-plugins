@@ -5,6 +5,8 @@
 //! a cluster-wide scan can name a finding for every image in every workload, and
 //! none of that has to be held in memory at once.
 
+mod progress;
+
 use std::collections::BTreeMap;
 use std::ffi::OsStr;
 use std::fmt::Write as _;
@@ -145,13 +147,14 @@ impl ScanMode {
 }
 
 fn configure(command: &mut Command, context: &str, namespace: &str, scan_mode: ScanMode) {
+    // Keep pb/v3 output recognizable even if the shell selects a font-specific bar.
+    command.env("UNICODE_PROGRESS_BAR", "false");
     command.args([
         "kubernetes",
         "--format",
         "json",
         "--report",
         "all",
-        "--quiet",
         "--disable-telemetry",
         "--skip-version-check",
         "--no-progress",
@@ -196,7 +199,9 @@ fn scan(context: &str, namespace: &str, scan_mode: ScanMode) -> Result<Envelope,
         .ok_or_else(|| "failed to capture Trivy stderr".to_string())?;
     // Drain stderr on its own thread: a chatty scan that fills the pipe would
     // otherwise block Trivy while this process waits on stdout.
-    let errors = std::thread::spawn(move || bounded_read(stderr, STDERR_MAX_BYTES));
+    let errors = std::thread::spawn(move || {
+        relay_diagnostics(stderr, std::io::stderr().lock(), STDERR_MAX_BYTES)
+    });
     let parsed = parse(&mut stdout);
     if parsed.is_err() {
         // Stop reading mid-document and Trivy dies of SIGPIPE, which would then
@@ -207,7 +212,10 @@ fn scan(context: &str, namespace: &str, scan_mode: ScanMode) -> Result<Envelope,
     let status = child
         .wait()
         .map_err(|e| format!("failed while waiting for Trivy: {e}"))?;
-    let stderr = errors.join().unwrap_or_default();
+    let stderr = errors
+        .join()
+        .map_err(|_| "Trivy diagnostic reader panicked".to_string())?
+        .map_err(|e| format!("cannot read or forward Trivy diagnostics: {e}"))?;
     match parsed {
         Ok(envelope) if status.success() => Ok(envelope),
         Ok(_) => Err(scan_error(None, &status.to_string(), &stderr)),
@@ -220,13 +228,13 @@ fn scan(context: &str, namespace: &str, scan_mode: ScanMode) -> Result<Envelope,
 /// stopped reading a document it could not parse.
 fn scan_error(parse_error: Option<String>, status: &str, stderr: &[u8]) -> String {
     match parse_error {
-        Some(error) => match first_line(stderr) {
+        Some(error) => match last_line(stderr) {
             Some(detail) => format!("Trivy failed: {detail}"),
             None => error,
         },
         None => format!(
             "Trivy exited with {status}: {}",
-            first_line(stderr).unwrap_or("no error output")
+            last_line(stderr).unwrap_or("no error output")
         ),
     }
 }
@@ -244,10 +252,66 @@ fn bounded_read(mut reader: impl Read, limit: usize) -> Vec<u8> {
     bytes
 }
 
-fn first_line(bytes: &[u8]) -> Option<&str> {
-    std::str::from_utf8(bytes)
-        .ok()?
-        .lines()
+/// Forward a bounded diagnostic prefix and retain a bounded tail for errors.
+/// Keep draining after the relay limit or a write error so Trivy can finish.
+fn relay_diagnostics(
+    mut reader: impl Read,
+    mut writer: impl std::io::Write,
+    limit: usize,
+) -> std::io::Result<Vec<u8>> {
+    let mut tail = Vec::new();
+    let mut forwarded = 0;
+    let mut truncated = false;
+    let mut write_error = None;
+    let mut normalizer = progress::ProgressText::default();
+    let mut chunk = [0; 8 * 1024];
+    if let Err(error) = writer
+        .write_all(b"Starting Trivy scan...\n")
+        .and_then(|()| writer.flush())
+    {
+        write_error = Some(error);
+    }
+    loop {
+        let read = match reader.read(&mut chunk) {
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+            result => result?,
+        };
+        let text = normalizer.feed(&chunk[..read], read == 0);
+        let keep = text.len().min(limit);
+        let remove = tail.len().saturating_add(keep).saturating_sub(limit);
+        tail.drain(..remove);
+        tail.extend_from_slice(&text[text.len() - keep..]);
+        if write_error.is_none() {
+            let send = text.len().min(limit.saturating_sub(forwarded));
+            let result = (|| {
+                writer.write_all(&text[..send])?;
+                forwarded += send;
+                if send < text.len() && !truncated {
+                    writer.write_all(b"\n[Trivy activity truncated; scan continues]\n")?;
+                    truncated = true;
+                }
+                writer.flush()
+            })();
+            if let Err(error) = result {
+                write_error = Some(error);
+            }
+        }
+        if read == 0 {
+            break;
+        }
+    }
+    match write_error {
+        Some(error) => Err(error),
+        None => Ok(tail),
+    }
+}
+
+fn last_line(bytes: &[u8]) -> Option<&str> {
+    // The retained tail can start inside a UTF-8 character. Its last line is
+    // still useful, so decode only that line when choosing an error summary.
+    bytes
+        .rsplit(|byte| matches!(byte, b'\r' | b'\n'))
+        .filter_map(|line| std::str::from_utf8(line).ok())
         .map(str::trim)
         .find(|line| !line.is_empty())
 }
@@ -1284,6 +1348,8 @@ mod tests {
         let scoped = arguments("prod", "apps", ScanMode::All);
         assert_eq!(&scoped[..4], ["kubernetes", "--format", "json", "--report"]);
         assert!(scoped.contains(&"--disable-telemetry".to_string()));
+        assert!(scoped.contains(&"--no-progress".to_string()));
+        assert!(!scoped.contains(&"--quiet".to_string()));
         assert!(scoped.contains(&"--disable-node-collector".to_string()));
         // --include-namespaces takes the namespace; the context is positional.
         let namespace = scoped
@@ -1329,6 +1395,132 @@ mod tests {
             scan_error(None, "exit status: 2", b""),
             "Trivy exited with exit status: 2: no error output"
         );
+    }
+
+    #[test]
+    fn diagnostics_are_forwarded_before_eof_and_flushed() {
+        use std::cell::RefCell;
+        use std::rc::Rc;
+
+        struct Writer(Rc<RefCell<Vec<u8>>>);
+        impl std::io::Write for Writer {
+            fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+                self.0.borrow_mut().extend_from_slice(bytes);
+                Ok(bytes.len())
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+        struct Reader {
+            output: Rc<RefCell<Vec<u8>>>,
+            read: bool,
+        }
+        impl Read for Reader {
+            fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+                if self.read {
+                    assert!(self.output.borrow().ends_with(b"Scanning image...\n"));
+                    return Ok(0);
+                }
+                assert!(
+                    self.output
+                        .borrow()
+                        .starts_with(b"Starting Trivy scan...\n")
+                );
+                self.read = true;
+                let message = b"Scanning image...\n";
+                buf[..message.len()].copy_from_slice(message);
+                Ok(message.len())
+            }
+        }
+        let output = Rc::new(RefCell::new(Vec::new()));
+        let tail = relay_diagnostics(
+            Reader {
+                output: output.clone(),
+                read: false,
+            },
+            std::io::BufWriter::new(Writer(output)),
+            STDERR_MAX_BYTES,
+        )
+        .unwrap();
+        assert_eq!(tail, b"Scanning image...\n");
+    }
+
+    #[test]
+    fn diagnostics_are_bounded_but_drained_and_keep_the_final_error() {
+        let mut input = std::io::Cursor::new(vec![b'x'; STDERR_MAX_BYTES * 3]);
+        input
+            .get_mut()
+            .extend_from_slice(b"\nFATAL unable to scan\n");
+        let mut output = Vec::new();
+        let tail = relay_diagnostics(&mut input, &mut output, STDERR_MAX_BYTES).unwrap();
+        assert_eq!(input.position() as usize, input.get_ref().len());
+        assert_eq!(tail.len(), STDERR_MAX_BYTES);
+        assert!(output.len() < STDERR_MAX_BYTES + 128);
+        assert_eq!(
+            String::from_utf8(output)
+                .unwrap()
+                .matches("activity truncated")
+                .count(),
+            1
+        );
+        assert_eq!(
+            scan_error(None, "exit status: 1", &tail),
+            "Trivy exited with exit status: 1: FATAL unable to scan"
+        );
+        assert_eq!(
+            last_line(b"\x80\nINFO starting\nFATAL failed\n"),
+            Some("FATAL failed")
+        );
+    }
+
+    #[test]
+    fn repeated_pipe_bars_do_not_exhaust_the_live_diagnostic_budget() {
+        let bar = format!("2 / 81 [-->{}] 2.47% ? p/s", "_".repeat(6000));
+        let input = format!(
+            "{}8 / 81 [--->____] 9.88% 1 p/s\nFATAL example\n",
+            bar.repeat(100)
+        );
+        let mut output = Vec::new();
+        let tail = relay_diagnostics(input.as_bytes(), &mut output, STDERR_MAX_BYTES).unwrap();
+        assert!(output.len() < 256);
+        let text = String::from_utf8(output).unwrap();
+        assert_eq!(text.matches("2 / 81").count(), 1);
+        assert!(text.contains("8 / 81 (9.88%)"));
+        assert!(!text.contains("truncated"));
+        assert_eq!(last_line(&tail), Some("FATAL example"));
+    }
+
+    #[test]
+    fn diagnostic_io_errors_are_not_silenced() {
+        struct Broken;
+        impl Read for Broken {
+            fn read(&mut self, _: &mut [u8]) -> std::io::Result<usize> {
+                Err(std::io::Error::other("read failed"))
+            }
+        }
+        impl std::io::Write for Broken {
+            fn write(&mut self, _: &[u8]) -> std::io::Result<usize> {
+                Err(std::io::Error::other("write failed"))
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+        assert_eq!(
+            relay_diagnostics(Broken, Vec::new(), 10)
+                .unwrap_err()
+                .to_string(),
+            "read failed"
+        );
+        let mut input = std::io::Cursor::new(vec![b'x'; 30_000]);
+        assert_eq!(
+            relay_diagnostics(&mut input, Broken, 10)
+                .unwrap_err()
+                .to_string(),
+            "write failed"
+        );
+        assert_eq!(input.position(), 30_000);
     }
 
     #[test]
