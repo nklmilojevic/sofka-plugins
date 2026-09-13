@@ -1,7 +1,122 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-13T11:29:32Z",
+  "generated_at": "2026-09-13T16:59:54Z",
   "plugins": [
+    {
+      "id": "cert-manager",
+      "display_name": "cert-manager",
+      "description": "Show the status of a cert-manager Certificate, inspect the certificate in a TLS Secret, and request a renewal with cmctl.",
+      "tags": [
+        "cert-manager",
+        "tls",
+        "certificates",
+        "secrets",
+        "x509",
+        "renew",
+        "report"
+      ],
+      "publisher": "zoispag",
+      "repository": "https://github.com/nklmilojevic/sofka-plugins",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "sofka": ">=0.27.1",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/69f66077583fa4f08b89835af65045d28f6757dd/plugins/cert-manager/README.md",
+          "requirements": [
+            {
+              "name": "cmctl",
+              "install": "Install cmctl from https://cert-manager.io/docs/reference/cmctl/#installation"
+            },
+            {
+              "name": "kubectl",
+              "install": "Install kubectl from https://kubernetes.io/docs/tasks/tools/"
+            }
+          ],
+          "commands": [
+            {
+              "name": "Certificate status",
+              "command": "./adapter",
+              "args": [
+                "status"
+              ],
+              "scopes": [
+                "certificates"
+              ],
+              "target": "selection",
+              "output": "report",
+              "mutating": false,
+              "confirm": false,
+              "dangerous": false,
+              "network_load": false,
+              "palette": "cert-manager-status"
+            },
+            {
+              "name": "Inspect TLS secret",
+              "command": "./adapter",
+              "args": [
+                "inspect"
+              ],
+              "scopes": [
+                "secrets"
+              ],
+              "target": "selection",
+              "output": "report",
+              "mutating": false,
+              "confirm": false,
+              "dangerous": false,
+              "network_load": false,
+              "palette": "cert-manager-inspect"
+            },
+            {
+              "name": "Renew certificate",
+              "command": "./adapter",
+              "args": [
+                "renew"
+              ],
+              "scopes": [
+                "certificates"
+              ],
+              "target": "selection",
+              "output": "report",
+              "mutating": true,
+              "confirm": true,
+              "dangerous": false,
+              "network_load": false,
+              "palette": "cert-manager-renew"
+            }
+          ],
+          "source_commit": "69f66077583fa4f08b89835af65045d28f6757dd",
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "x86_64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/cert-manager-v0.1.0/cert-manager-0.1.0-x86_64-unknown-linux-gnu.tar.zst",
+              "blake3": "09e6ca69ca3a25826080f71378df6f88180b9fe0a51b35e36cae43a746b7f6d9",
+              "size": 382314
+            },
+            {
+              "platform": "aarch64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/cert-manager-v0.1.0/cert-manager-0.1.0-aarch64-unknown-linux-gnu.tar.zst",
+              "blake3": "5b661b09fb0ac0fba48d9e97679ec656cd931904a00a63a8f9210f4c6a25244a",
+              "size": 347642
+            },
+            {
+              "platform": "x86_64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/cert-manager-v0.1.0/cert-manager-0.1.0-x86_64-apple-darwin.tar.zst",
+              "blake3": "0fa356b92dbd11887450fc82469706b0b48da83bc84adf9ef4562bf571efc132",
+              "size": 368333
+            },
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/cert-manager-v0.1.0/cert-manager-0.1.0-aarch64-apple-darwin.tar.zst",
+              "blake3": "da260dc7dee9d4078f2589844524f8b35d3a91d51c93c288f94675bc37b636e1",
+              "size": 325967
+            }
+          ]
+        }
+      ]
+    },
     {
       "id": "chaos-kill",
       "display_name": "Chaos kill",
