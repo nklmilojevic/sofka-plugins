@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "sections": [
+    {
+      "columns": [
+        "Field",
+        "Value"
+      ],
+      "rows": [
+        [
+          "Context",
+          "development"
+        ],
+        [
+          "Namespace",
+          "apps"
+        ],
+        [
+          "Secret",
+          "web-tls"
+        ]
+      ],
+      "title": "Summary"
+    },
+    {
+      "lines": [
+        "DNS Names:",
+        "  - web.example.com",
+        "  - www.example.com",
+        "URIs: <none>",
+        "IP Addresses: <none>",
+        "Email Addresses: <none>",
+        "Usages:",
+        "  - digital signature",
+        "  - key encipherment",
+        "  - server auth",
+        "  - client auth"
+      ],
+      "title": "Valid for"
+    },
+    {
+      "lines": [
+        "Not Before: Tue, 14 Jul 2026 07:00:00 UTC",
+        "Not After: Mon, 12 Oct 2026 06:59:59 UTC"
+      ],
+      "title": "Validity period"
+    },
+    {
+      "lines": [
+        "Common Name: Example Intermediate R1",
+        "Organization: Example Trust Services",
+        "OrganizationalUnit: <none>",
+        "Country: US"
+      ],
+      "title": "Issued By"
+    },
+    {
+      "lines": [
+        "Common Name: <none>",
+        "Organization: <none>",
+        "OrganizationalUnit: <none>",
+        "Country: <none>"
+      ],
+      "title": "Issued For"
+    },
+    {
+      "lines": [
+        "Signing Algorithm: SHA256-RSA",
+        "Public Key Algorithm: RSA",
+        "Serial Number: 430673462503741351513170006858831388180625",
+        "Fingerprints: 26:6A:9A:63:72:70:84:8B:EC:9A:42:43:C7:D3:D3:C6:C3:30:D8:A2:10:76:53:E0:4E:5E:46:2C:8E:C5:9D:9C",
+        "Is a CA certificate: false",
+        "CRL: http://crl.example.com/r1.crl",
+        "OCSP: http://ocsp.example.com"
+      ],
+      "title": "Certificate"
+    }
+  ],
+  "title": "TLS secret"
+}
