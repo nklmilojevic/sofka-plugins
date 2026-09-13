@@ -53,8 +53,10 @@ branch does not report newer base-branch entries as deleted. Increment the seman
 package version for every source or manifest change. Keep package versions, the
 catalog schema version, and `plugin.toml` schema versions independent.
 
-Before opening a pull request, run `python3 scripts/catalog.py validate` and
-`python3 scripts/test_catalog.py`. Both need Python 3.11 or newer; CI pins 3.12.
+Use the [local development setup](README.md#local-development) for Nix, uv, and
+direnv. Before opening a pull request, run `uv run --locked python scripts/catalog.py validate`
+and `uv run --locked python scripts/test_catalog.py`. The development environment
+and CI use Python 3.12.
 Validation applies `index.schema.json` and the same manifest rules sofka applies
 when it loads a package, so a package sofka would refuse never reaches review.
 

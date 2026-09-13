@@ -74,12 +74,16 @@ Apache license files. Do not create a separate publication metadata file.
 
 ## Checks
 
-Install the pinned Python dependencies from `scripts/requirements.txt` in an
-isolated environment. For package or catalog changes, run from the repository root:
+Use `nix develop` for the pinned Rust and Python tools, or enable `.envrc` with
+direnv. `nix develop .#tools` also provides the external plugin tools. Use uv to
+manage `.venv`; run `uv sync --locked` after dependency changes. See the
+[local setup instructions](README.md#local-development).
+
+For package or catalog changes, run from the repository root:
 
 ```sh
-python3 scripts/catalog.py validate
-python3 scripts/test_catalog.py
+uv run --locked python scripts/catalog.py validate
+uv run --locked python scripts/test_catalog.py
 ```
 
 For Rust or Cargo changes, also run:
@@ -103,6 +107,12 @@ After committing package changes, run `scripts/catalog.py assert-unpublished`
 with the PR base and head refs. CI in `.github/workflows/ci.yaml` is the authority
 for required checks. Repeat checks after relevant changes or failures; reuse
 results for code that has not changed.
+
+Python dependencies belong in `pyproject.toml`. Regenerate `uv.lock` with uv and
+export `scripts/requirements.txt` with the command in the README. CI still uses
+that generated requirements file. For development-environment changes, check
+the flake with `nix flake check --no-build` and run the affected checks inside
+`nix develop`. Do not commit `.venv`, `.direnv`, or Nix result links.
 
 ## Publication and handoff
 
