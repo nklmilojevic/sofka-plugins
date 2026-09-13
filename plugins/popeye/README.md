@@ -29,7 +29,9 @@ time. There is no estimated percentage or invented per-linter progress. Logging
 flags stay unchanged, so quiet scans may only show the start message until they
 finish. Forwarded diagnostics stop after 64 KiB with a notice; the adapter keeps
 draining the pipe and preparing the report. Saved reports do not start a scan.
-Stdout remains the same JSON report, with no schema change.
+Stdout remains the same JSON report, with no schema change. If activity cannot
+be written, capture and report processing continue. Child read and process
+failures remain errors.
 
 ## Inputs
 

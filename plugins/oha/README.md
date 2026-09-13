@@ -53,7 +53,9 @@ Child diagnostics are forwarded as they arrive, up to 64 KiB. The adapter keeps
 draining after that limit and shows a truncation notice. Duration updates stop
 after six minutes, even if a manually invoked process runs longer. The manifest
 and report schemas are unchanged. The adapter does not print the target URL in
-activity messages.
+activity messages. If activity cannot be written, the adapter still drains the
+child pipes and returns the final report. Child read and process failures remain
+errors.
 
 ## Inputs
 

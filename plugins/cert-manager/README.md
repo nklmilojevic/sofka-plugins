@@ -95,6 +95,8 @@ The adapter sends status, inspection, and renewal phase messages to stderr for
 Sofka's activity popup. It forwards up to 64 KiB of child-tool diagnostics, then
 shows a truncation notice and keeps draining. Secret JSON, PEM certificate bytes,
 and private-key data are not copied from stdout into activity messages.
+A failed activity write does not discard the final report, including after a
+renewal request. Child read and process failures remain errors.
 
 A renewal message distinguishes a submitted request from verified issuance. The
 adapter does not wait for a new certificate; use the status command to follow it.

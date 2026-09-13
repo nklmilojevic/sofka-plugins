@@ -180,7 +180,10 @@ fn scan(context: &str, namespace: &str) -> Result<Envelope, String> {
         .stderr
         .take()
         .ok_or_else(|| "failed to capture Popeye stderr".to_string())?;
-    eprintln!("Popeye Kubernetes scan started; waiting for scanner results");
+    let _ = writeln!(
+        std::io::stderr(),
+        "Popeye Kubernetes scan started; waiting for scanner results"
+    );
     // Drain stderr independently while stdout remains the final JSON report.
     let errors =
         std::thread::spawn(move || activity::relay(stderr, std::io::stderr(), STDERR_MAX_BYTES));
@@ -200,10 +203,10 @@ fn scan(context: &str, namespace: &str) -> Result<Envelope, String> {
     let stderr = errors
         .join()
         .map_err(|_| "Popeye diagnostic reader panicked".to_string())?
-        .map_err(|e| format!("cannot read or forward Popeye diagnostics: {e}"))?;
+        .map_err(|e| format!("cannot read Popeye diagnostics: {e}"))?;
     match parsed {
         Ok(envelope) if status.success() => {
-            eprintln!("Popeye scan finished; preparing report");
+            let _ = writeln!(std::io::stderr(), "Popeye scan finished; preparing report");
             Ok(envelope)
         }
         Ok(_) => Err(scan_error(None, &status.to_string(), &stdout, &stderr)),

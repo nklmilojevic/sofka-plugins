@@ -37,6 +37,9 @@ are passed through unchanged.
 
 Live diagnostics stop after 64 KiB of normalized text with a truncation notice,
 but the scan continues. The adapter keeps the last 64 KiB for error reporting.
+A failed activity write does not discard the report or the captured diagnostics.
+Child read and process failures remain errors. Normalized progress records are
+not selected as error summaries, so progress alone cannot hide a JSON parse error.
 
 ## Inputs
 

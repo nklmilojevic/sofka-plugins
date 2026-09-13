@@ -33,10 +33,8 @@ pub(super) fn relay(
             write_error = result.err();
         }
     }
-    match write_error {
-        Some(error) => Err(error),
-        None => Ok(captured),
-    }
+    // A broken activity destination does not invalidate captured child output.
+    Ok(captured)
 }
 
 #[cfg(test)]
@@ -67,10 +65,7 @@ mod tests {
             }
         }
         reader.set_position(0);
-        assert_eq!(
-            relay(&mut reader, Broken, 1024).unwrap_err().to_string(),
-            "write failed"
-        );
+        assert_eq!(relay(&mut reader, Broken, 1024).unwrap(), vec![b'x'; 1024]);
         assert_eq!(reader.position(), 100_000);
     }
 

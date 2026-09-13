@@ -215,7 +215,7 @@ fn scan(context: &str, namespace: &str, scan_mode: ScanMode) -> Result<Envelope,
     let stderr = errors
         .join()
         .map_err(|_| "Trivy diagnostic reader panicked".to_string())?
-        .map_err(|e| format!("cannot read or forward Trivy diagnostics: {e}"))?;
+        .map_err(|e| format!("cannot read Trivy diagnostics: {e}"))?;
     match parsed {
         Ok(envelope) if status.success() => Ok(envelope),
         Ok(_) => Err(scan_error(None, &status.to_string(), &stderr)),
@@ -300,10 +300,8 @@ fn relay_diagnostics(
             break;
         }
     }
-    match write_error {
-        Some(error) => Err(error),
-        None => Ok(tail),
-    }
+    // Preserve the report and error tail even when activity cannot be written.
+    Ok(tail)
 }
 
 fn last_line(bytes: &[u8]) -> Option<&str> {
@@ -313,7 +311,7 @@ fn last_line(bytes: &[u8]) -> Option<&str> {
         .rsplit(|byte| matches!(byte, b'\r' | b'\n'))
         .filter_map(|line| std::str::from_utf8(line).ok())
         .map(str::trim)
-        .find(|line| !line.is_empty())
+        .find(|line| !line.is_empty() && !line.starts_with("Trivy progress: "))
 }
 
 /// `serde_json::from_reader` pulls one byte per `Read::read`, so an unbuffered
@@ -1492,7 +1490,7 @@ mod tests {
     }
 
     #[test]
-    fn diagnostic_io_errors_are_not_silenced() {
+    fn diagnostic_read_errors_propagate_but_write_errors_preserve_capture() {
         struct Broken;
         impl Read for Broken {
             fn read(&mut self, _: &mut [u8]) -> std::io::Result<usize> {
@@ -1515,12 +1513,26 @@ mod tests {
         );
         let mut input = std::io::Cursor::new(vec![b'x'; 30_000]);
         assert_eq!(
-            relay_diagnostics(&mut input, Broken, 10)
-                .unwrap_err()
-                .to_string(),
-            "write failed"
+            relay_diagnostics(&mut input, Broken, 10).unwrap(),
+            vec![b'x'; 10]
         );
         assert_eq!(input.position(), 30_000);
+    }
+
+    #[test]
+    fn normalized_progress_does_not_mask_parse_errors_or_real_diagnostics() {
+        let progress = b"\rTrivy progress: 8 / 81 (9.88%) 1 p/s";
+        assert_eq!(
+            scan_error(Some("invalid JSON".into()), "exit status: 0", progress),
+            "invalid JSON"
+        );
+        let mut stderr = b"FATAL database unavailable\n".to_vec();
+        stderr.extend_from_slice(progress);
+        assert_eq!(
+            scan_error(Some("invalid JSON".into()), "exit status: 1", &stderr),
+            "Trivy failed: FATAL database unavailable"
+        );
+        assert_eq!(last_line(progress), None);
     }
 
     #[test]

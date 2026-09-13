@@ -218,10 +218,13 @@ fn status(request: &Request) -> Result<Value, String> {
     let text = match replay(request)? {
         Some(text) => text,
         None => {
-            eprintln!("Reading certificate status with cmctl");
+            let _ = writeln!(std::io::stderr(), "Reading certificate status with cmctl");
             let args = arguments(&["status", "certificate"], request);
             let output = execute_tool(CMCTL, &args, CMCTL_INSTALL)?;
-            eprintln!("Certificate status collected; preparing report");
+            let _ = writeln!(
+                std::io::stderr(),
+                "Certificate status collected; preparing report"
+            );
             output
         }
     };
@@ -233,11 +236,17 @@ fn inspect(request: &Request) -> Result<Value, String> {
     let text = match replay(request)? {
         Some(text) => text,
         None => {
-            eprintln!("Reading the selected certificate for inspection");
+            let _ = writeln!(
+                std::io::stderr(),
+                "Reading the selected certificate for inspection"
+            );
             let pem = certificate_pem(request, &target)?;
-            eprintln!("Inspecting leaf certificate metadata");
+            let _ = writeln!(std::io::stderr(), "Inspecting leaf certificate metadata");
             let output = describe_leaf(&pem)?;
-            eprintln!("Certificate inspection finished; preparing report");
+            let _ = writeln!(
+                std::io::stderr(),
+                "Certificate inspection finished; preparing report"
+            );
             output
         }
     };
@@ -248,12 +257,21 @@ fn renew(request: &Request) -> Result<Value, String> {
     let target = certificate(request)?;
     let args = arguments(&["renew"], request);
     if dry_run(request) {
-        eprintln!("Dry run: no certificate renewal will be requested");
+        let _ = writeln!(
+            std::io::stderr(),
+            "Dry run: no certificate renewal will be requested"
+        );
         return Ok(render_renew(request, &target, &args, None));
     }
-    eprintln!("Requesting certificate renewal with cmctl");
+    let _ = writeln!(
+        std::io::stderr(),
+        "Requesting certificate renewal with cmctl"
+    );
     let output = execute_tool(CMCTL, &args, CMCTL_INSTALL)?;
-    eprintln!("Renewal request submitted; new certificate issuance is not verified");
+    let _ = writeln!(
+        std::io::stderr(),
+        "Renewal request submitted; new certificate issuance is not verified"
+    );
     Ok(render_renew(request, &target, &args, Some(&output)))
 }
 
@@ -356,10 +374,8 @@ fn capture(
             captured.truncated = true;
         }
     }
-    match write_error {
-        Some(error) => Err(error),
-        None => Ok(captured),
-    }
+    // Activity is optional, including after a successful renewal request.
+    Ok(captured)
 }
 
 /// Run `program` with `args`, arguments passed separately. Returns stdout on
@@ -429,7 +445,10 @@ fn certificate_pem(request: &Request, target: &Target<'_>) -> Result<Vec<u8>, St
             ));
         }
         None => {
-            eprintln!("Reading the selected TLS Secret with kubectl");
+            let _ = writeln!(
+                std::io::stderr(),
+                "Reading the selected TLS Secret with kubectl"
+            );
             let mut args = arguments(&["get", "secret"], request);
             args.extend(["--output".to_string(), "json".to_string()]);
             let json = execute_tool(KUBECTL, &args, KUBECTL_INSTALL)?;
@@ -1524,12 +1543,9 @@ mod tests {
             }
         }
         input.set_position(0);
-        assert_eq!(
-            capture(&mut input, 1024, Some(&mut Broken))
-                .unwrap_err()
-                .to_string(),
-            "write failed"
-        );
+        let captured = capture(&mut input, 1024, Some(&mut Broken)).unwrap();
+        assert_eq!(captured.bytes, vec![b'x'; 1024]);
+        assert!(captured.truncated);
         assert_eq!(input.position(), 100_000);
     }
 

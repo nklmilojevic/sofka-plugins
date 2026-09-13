@@ -246,17 +246,15 @@ fn benchmark(url: &str, options: &Options) -> Result<Report, String> {
     let status = child
         .wait()
         .map_err(|e| format!("failed while waiting for oha: {e}"))?;
-    let progress_result = progress.finish();
+    // Optional activity must not discard an otherwise complete report.
+    let _ = progress.finish();
     let stderr = errors
         .join()
         .map_err(|_| "oha diagnostic reader panicked".to_string())?
-        .map_err(|e| format!("cannot read or forward oha diagnostics: {e}"))?;
-    progress_result.map_err(|e| format!("cannot write oha activity: {e}"))?;
+        .map_err(|e| format!("cannot read oha diagnostics: {e}"))?;
     match parsed {
         Ok(report) if status.success() => {
-            std::io::stderr()
-                .write_all(b"oha finished; preparing report\n")
-                .map_err(|e| format!("cannot write oha activity: {e}"))?;
+            let _ = std::io::stderr().write_all(b"oha finished; preparing report\n");
             Ok(report)
         }
         Ok(_) => Err(run_error(None, &status.to_string(), &stderr)),

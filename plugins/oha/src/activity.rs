@@ -121,10 +121,8 @@ pub(super) fn relay_stderr(
             }
         }
     }
-    match write_error {
-        Some(error) => Err(error),
-        None => Ok(captured),
-    }
+    // A broken activity destination does not invalidate captured child output.
+    Ok(captured)
 }
 
 #[cfg(test)]
@@ -171,7 +169,7 @@ mod tests {
     }
 
     #[test]
-    fn diagnostic_read_and_write_errors_propagate_without_stopping_the_drain() {
+    fn read_errors_propagate_but_write_errors_preserve_capture_and_drain() {
         struct Broken;
         impl Read for Broken {
             fn read(&mut self, _: &mut [u8]) -> io::Result<usize> {
@@ -193,12 +191,7 @@ mod tests {
             "read failed"
         );
         let mut input = io::Cursor::new(vec![0; 100_000]);
-        assert_eq!(
-            relay_stderr(&mut input, Broken, 10)
-                .unwrap_err()
-                .to_string(),
-            "write failed"
-        );
+        assert_eq!(relay_stderr(&mut input, Broken, 10).unwrap(), vec![0; 10]);
         assert_eq!(input.position(), 100_000);
     }
 }
