@@ -1,13 +1,14 @@
-schema_version = 1
+schema_version = 2
 
 [package]
-version = "0.1.0"
+display_name = "Trivy scan"
+version = "0.1.1"
 authors = ["vyrti"]
 license = "MIT OR Apache-2.0"
 description = "Scan the active context with Trivy and report vulnerabilities, misconfigurations, and secrets."
 repository = "https://github.com/nklmilojevic/sofka-plugins"
 readme = "README.md"
-sofka = ">=0.26.0"
+sofka = ">=0.27.1"
 platforms = [
   "x86_64-unknown-linux-gnu",
   "aarch64-unknown-linux-gnu",
@@ -16,7 +17,7 @@ platforms = [
 ]
 tags = ["security", "vulnerabilities", "report", "audit"]
 
-[plugin]
+[[commands]]
 name = "Trivy scan"
 palette = "trivy"
 command = "./adapter"
@@ -28,11 +29,11 @@ target = "context"
 mutating = false
 timeout = "30m"
 
-[plugin.inputs.scan]
+[commands.inputs.scan]
 type = "string"
 default = "all"
 choices = ["all", "misconfig"]
 
-[plugin.inputs.report]
+[commands.inputs.report]
 type = "string"
 default = ""

@@ -15,6 +15,10 @@ GitHub Release assets and are never committed to Git.
 | [`trivy`](plugins/trivy)                       | [Trivy](https://trivy.dev) on `PATH`                   |
 | [`resource-summary`](plugins/resource-summary) | nothing                                                |
 
+Packages use manifest schema `2` and require Sofka `>=0.27.1`. Each package can
+contain several `[[commands]]` entries with separate inputs, scopes, and safety
+settings. Publish these versions after Sofka adds schema 2 support.
+
 The complete scope, design, and acceptance criteria are in
 [sofka issue #502](https://github.com/nklmilojevic/sofka/issues/502).
 The agreed proposal is in
@@ -22,6 +26,41 @@ The agreed proposal is in
 
 See the existing [plugin authoring guide](https://github.com/nklmilojevic/sofka/blob/main/docs/plugin-authoring.md)
 for the current package format.
+
+## Local development
+
+The Nix flake provides Rust, Cargo, Clippy, rustfmt, rust-analyzer, Python 3.12,
+uv, Git, jq, and the Nix formatter. `flake.lock` pins the tool versions.
+
+```sh
+nix develop
+uv sync --locked
+uv run --locked python scripts/catalog.py validate
+uv run --locked python scripts/test_catalog.py
+```
+
+Use `nix develop .#tools` when you also need kubectl, cmctl, oha, popeye, and
+trivy. The default shell is enough for fixture tests.
+
+For automatic setup, install direnv and enable its hook in your shell. Run
+`direnv allow` in this directory after you review `.envrc`. It loads the Nix
+shell, runs `uv sync --locked`, and activates `.venv`. nix-direnv is optional
+and can cache the Nix environment. Dependency-file changes reload the environment.
+
+Without Nix, install a Rust toolchain with Clippy and rustfmt, then use
+`uv sync --locked`. uv selects Python 3.12 from `.python-version`.
+
+Declare Python dependencies in `pyproject.toml` and commit `uv.lock`. After a
+dependency change, regenerate the requirements file used by CI:
+
+```sh
+uv lock
+uv export --locked --no-dev --no-hashes --no-annotate --no-emit-project --output-file scripts/requirements.txt
+```
+
+Do not edit the generated requirements file by hand. `.venv`, `.direnv`, and
+Nix result links are ignored by Git. See [AGENTS.md](AGENTS.md) for the plugin
+workflow and required checks.
 
 ## Publishing a package
 

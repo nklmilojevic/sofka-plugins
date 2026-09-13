@@ -93,7 +93,7 @@ RESERVED = frozenset({
 SCHEMA_KEYWORDS = {
     "$defs", "$id", "$ref", "$schema", "additionalProperties", "const", "enum",
     "format", "items", "maximum", "minItems", "minLength", "minimum",
-    "pattern", "properties", "required", "title", "type",
+    "pattern", "properties", "required", "title", "type", "oneOf",
 }
 DATE_TIME = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2})")
 URI = re.compile(r"[a-z][a-z0-9+.-]*:.+")
@@ -109,12 +109,12 @@ def plugin_ids() -> list[str]:
 
 
 ADAPTER = "adapter"
-PACKAGE_FIELDS = {"version", "authors", "license", "description", "repository", "readme", "sofka", "platforms", "tags", "requirements"}
+PACKAGE_FIELDS = {"version", "display_name", "authors", "license", "description", "repository", "readme", "sofka", "platforms", "tags", "requirements"}
 REQUIRED_PACKAGE_FIELDS = {"version", "authors", "license", "description", "repository", "readme", "sofka", "platforms"}
 
 
 def manifest(plugin: str) -> dict[str, object]:
-    """The authored `plugin.toml`, validated, as `{"package": ..., "plugin": ...}`."""
+    """The authored `plugin.toml`, validated, as `{"package": ..., "commands": [...]}`."""
     value = tomllib.loads((PLUGINS / plugin / "plugin.toml").read_text(encoding="utf-8"))
     validate_manifest(plugin, value)
     return value
@@ -124,10 +124,10 @@ def publication(plugin: str) -> dict[str, object]:
     """The catalog's view of a package: its `[package]` table flattened together
     with the execution fields the index records."""
     value = manifest(plugin)
-    package, definition = value["package"], value["plugin"]
+    package, definitions = value["package"], value["commands"]
     return {
         "id": plugin,
-        "display_name": definition["name"],
+        "display_name": package.get("display_name", definitions[0]["name"]),
         "description": package["description"],
         "tags": package.get("tags", []),
         "publisher": ", ".join(package["authors"]),
@@ -136,19 +136,57 @@ def publication(plugin: str) -> dict[str, object]:
         "sofka": package["sofka"],
         "license": package["license"],
         "readme": package["readme"],
-        "requirements": package.get("requirements", [
-            {"name": name, "install": definition.get("install", "")}
-            for name in definition.get("requires", [])
-        ]),
-        "command": definition["command"],
-        "target": definition.get("target", "selection"),
-        "output": definition["output"],
-        "mutating": definition["mutating"],
-        "confirm": definition.get("confirm", False),
-        "dangerous": definition.get("dangerous", False),
-        "network_load": definition.get("network_load", False),
+        "requirements": package_requirements(package, definitions, plugin),
+        "commands": [command_metadata(definition) for definition in definitions],
         "platforms": package["platforms"],
     }
+
+
+EXECUTION_FIELDS = {"command", "target", "output", *FLAGS}
+COMMAND_FIELDS = EXECUTION_FIELDS | {"name", "palette", "key", "args", "scopes"}
+
+
+def command_metadata(definition: dict[str, object]) -> dict[str, object]:
+    result = {
+        "name": definition["name"], "command": definition["command"],
+        "args": definition.get("args", []), "scopes": definition.get("scopes", []),
+        "target": definition.get("target", "selection"), "output": definition["output"],
+        **{flag: definition.get(flag, flag == "mutating") for flag in FLAGS},
+    }
+    for field in ("palette", "key"):
+        if field in definition and (field != "key" or definition[field]):
+            result[field] = definition[field]
+    return result
+
+
+def validate_commands(commands: object, label: str) -> None:
+    check(isinstance(commands, list) and commands, f"{label}: commands must be a nonempty array")
+    seen = {field: set() for field in ("name", "palette", "key")}
+    for command in commands:
+        check(isinstance(command, dict), f"{label}: command must be an object")
+        required(command, COMMAND_FIELDS - {"palette", "key"}, label)
+        check(not command.keys() - COMMAND_FIELDS, f"{label}: unknown command fields")
+        for field in ("name", "palette", "key"):
+            if field in command:
+                check(isinstance(command[field], str) and command[field].strip(), f"{label}: invalid command {field}")
+        check("palette" in command or "key" in command, f"{label}: command needs a palette or key")
+        if "palette" in command:
+            check(PALETTE.fullmatch(command["palette"]) is not None and command["palette"] not in RESERVED, f"{label}: invalid palette")
+        for field in ("args", "scopes"):
+            check(isinstance(command[field], list) and all(isinstance(value, str) for value in command[field]), f"{label}: invalid {field}")
+        for field, values in seen.items():
+            if field in command:
+                check(command[field] not in values, f"{label}: duplicate command {field}")
+                values.add(command[field])
+        validate_command_execution(command, label)
+
+
+def validate_command_execution(value: dict[str, object], label: str) -> None:
+    check(isinstance(value["command"], str) and value["command"].strip() != "", f"{label}: empty command")
+    check(value["target"] in TARGET_MODES, f"{label}: target must be selection or context")
+    check(value["output"] in OUTPUT_MODES, f"{label}: output must be popup, background or report")
+    for flag in FLAGS:
+        check(isinstance(value[flag], bool), f"{label}: {flag} must be a boolean")
 
 
 def check(condition: bool, message: str) -> None:
@@ -187,6 +225,15 @@ def validate_schema(value: object, schema: dict[str, object], root: dict[str, ob
         check(isinstance(definition, dict), f"{where}: unknown schema reference {schema['$ref']}")
         validate_schema(value, definition, root, where)
         return
+    if "oneOf" in schema:
+        matches = 0
+        for alternative in schema["oneOf"]:
+            try:
+                validate_schema(value, alternative, root, where)
+                matches += 1
+            except ValueError:
+                pass
+        check(matches == 1, f"{where}: expected exactly one schema alternative")
     if "type" in schema:
         check(has_type(value, str(schema["type"])), f"{where}: expected {schema['type']}")
     if "const" in schema:
@@ -290,7 +337,7 @@ def valid_version_requirement(value: object) -> bool:
     return True
 
 
-def requires_supported_sofka(value: object) -> bool:
+def requires_supported_sofka(value: object, minimum: tuple[int, int, int, bool] = SOFKA_MINIMUM) -> bool:
     """A package must exclude every sofka release older than 0.26.0.
 
     VersionReq comparators are ANDed, so the strongest lower-bound comparator
@@ -302,19 +349,30 @@ def requires_supported_sofka(value: object) -> bool:
     if value.lstrip(" ").rstrip(" ") in {"*", "x", "X"}:
         return False
     lower_bounds: list[tuple[int, int, int, bool]] = []
-    for part in value.lstrip(" ").split(","):
-        match = COMPARATOR.fullmatch(part.lstrip(" "))
+    comparators = [COMPARATOR.fullmatch(part.lstrip(" ")) for part in value.lstrip(" ").split(",")]
+    for match in comparators:
         if match is None or match["op"] in {"<", "<="}:
             continue
         minor = match["minor"]
         patch = match["patch"]
-        lower_bounds.append((
+        numbers = [
             int(match["major"]),
             int(minor) if minor is not None and minor not in {"*", "x", "X"} else 0,
             int(patch) if patch is not None and patch not in {"*", "x", "X"} else 0,
-            match["pre"] is None,
-        ))
-    return bool(lower_bounds) and max(lower_bounds) >= SOFKA_MINIMUM
+        ]
+        stable = match["pre"] is None
+        if match["op"] == ">" and stable and (*numbers, stable) < minimum:
+            component = 2 if patch is not None and patch not in {"*", "x", "X"} else 1 if minor is not None and minor not in {"*", "x", "X"} else 0
+            if numbers[component] == U64_MAX:
+                continue
+            numbers[component] += 1
+            stable = not any(
+                other is not None and other["pre"] is not None
+                and [other["major"], other["minor"], other["patch"]] == list(map(str, numbers))
+                for other in comparators
+            )
+        lower_bounds.append((*numbers, stable))
+    return bool(lower_bounds) and max(lower_bounds) >= minimum
 
 
 def validate_requirement(requirement: object, label: str) -> None:
@@ -334,6 +392,32 @@ def validate_requirement(requirement: object, label: str) -> None:
     check(len(set(alternatives)) == len(alternatives) and name not in alternatives, f"{label}: duplicate requirement alternative")
 
 
+def aggregate_requirements(requirements: object, label: str) -> list[dict[str, object]]:
+    """Keep one record per tool and reject conflicting installation metadata."""
+    check(isinstance(requirements, list), f"{label}: requirements must be an array")
+    by_name: dict[str, dict[str, object]] = {}
+    for requirement in requirements:
+        validate_requirement(requirement, label)
+        normalized = {"name": requirement["name"], "install": requirement["install"]}
+        if requirement.get("alternatives"):
+            normalized["alternatives"] = requirement["alternatives"]
+        name = normalized["name"]
+        check(name not in by_name or by_name[name] == normalized,
+              f"{label}: conflicting metadata for requirement {name!r}")
+        by_name[name] = normalized
+    return list(by_name.values())
+
+
+def package_requirements(package: dict[str, object], commands: list[dict[str, object]], label: str) -> list[dict[str, object]]:
+    if "requirements" in package:
+        return aggregate_requirements(package["requirements"], label)
+    return aggregate_requirements([
+        {"name": name, "install": command.get("install", "")}
+        for command in commands
+        for name in command.get("requires", [])
+    ], label)
+
+
 def validate_execution(value: dict[str, object], label: str, published: bool = True) -> None:
     """The runtime fields an authored package and its catalog release record
     share. A manifest names its README by filename; publication turns that into
@@ -343,19 +427,24 @@ def validate_execution(value: dict[str, object], label: str, published: bool = T
     check(isinstance(value["license"], str) and value["license"].strip() != "", f"{label}: empty license")
     if published:
         check(isinstance(value["readme"], str) and value["readme"].startswith("https://"), f"{label}: README must use HTTPS")
-    check(isinstance(value["command"], str) and value["command"].strip() != "", f"{label}: empty command")
-    check(value["target"] in TARGET_MODES, f"{label}: target must be selection or context")
-    check(value["output"] in OUTPUT_MODES, f"{label}: output must be popup, background or report")
-    for flag in FLAGS:
-        check(isinstance(value[flag], bool), f"{label}: {flag} must be a boolean")
+    if "commands" in value:
+        check(not EXECUTION_FIELDS & value.keys(), f"{label}: commands cannot mix with legacy execution fields")
+        check(requires_supported_sofka(value["sofka"], (0, 27, 0, True)), f"{label}: command packages require sofka >=0.27.0")
+        validate_commands(value["commands"], label)
+    else:
+        validate_command_execution(value, label)
     check(isinstance(value["requirements"], list), f"{label}: requirements must be an array")
-    for requirement in value["requirements"]:
-        validate_requirement(requirement, label)
+    if "commands" in value:
+        requirements = aggregate_requirements(value["requirements"], label)
+        check(len(requirements) == len(value["requirements"]), f"{label}: duplicate requirement names")
+    else:
+        for requirement in value["requirements"]:
+            validate_requirement(requirement, label)
 
 
 def validate_index(index: dict[str, object]) -> None:
     check(set(index) == {"schema_version", "generated_at", "plugins"}, "index has unknown or missing fields")
-    check(index["schema_version"] == 1, "index schema_version must be 1")
+    check(index["schema_version"] in (1, 2), "index schema_version must be 1 or 2")
     check(isinstance(index["generated_at"], str), "index generated_at must be a string")
     check(isinstance(index["plugins"], list), "index plugins must be an array")
     seen_ids: set[str] = set()
@@ -375,7 +464,12 @@ def validate_index(index: dict[str, object]) -> None:
         seen_versions: set[str] = set()
         for release in plugin["versions"]:
             check(isinstance(release, dict), f"{plugin_id}: version must be an object")
-            release_fields = {"version", "sofka", "source_commit", "license", "readme", "requirements", "command", "target", "output", "mutating", "confirm", "dangerous", "network_load", "status", "withdrawal_reason", "artifacts"}
+            release_fields = {"version", "sofka", "source_commit", "license", "readme", "requirements", "status", "withdrawal_reason", "artifacts"}
+            if "commands" in release:
+                check(index["schema_version"] == 2, "commands require catalog schema 2")
+                release_fields.add("commands")
+            else:
+                release_fields |= EXECUTION_FIELDS
             required(release, release_fields - {"withdrawal_reason"}, f"{plugin_id} version")
             check(not (release.keys() - release_fields), f"{plugin_id} version: unknown fields")
             version = release["version"]
@@ -431,27 +525,44 @@ def input_value(spec: dict[str, object], value: str) -> bool:
     return not choices or value in choices
 
 
-def validate_manifest(plugin: str, manifest: dict[str, object]) -> dict[str, object]:
+def validate_manifest(plugin: str, manifest: dict[str, object]) -> list[dict[str, object]]:
     """Apply the package rules from sofka's plugins::validate_plugin, so a package
     sofka would refuse to load never reaches the catalog."""
-    check(set(manifest) <= {"schema_version", "package", "plugin"}, f"{plugin}: unknown plugin.toml tables")
-    check(manifest.get("schema_version") == 1, f"{plugin}: plugin.toml schema must be 1")
+    check(set(manifest) <= {"schema_version", "package", "commands"}, f"{plugin}: unknown plugin.toml tables")
+    check(manifest.get("schema_version") == 2, f"{plugin}: plugin.toml schema must be 2")
     package = manifest.get("package")
     check(isinstance(package, dict), f"{plugin}: plugin.toml needs a [package] table to be published")
     required(package, REQUIRED_PACKAGE_FIELDS, f"{plugin} package")
     unknown_package = sorted(package.keys() - PACKAGE_FIELDS)
     check(not unknown_package, f"{plugin} package: unknown fields {', '.join(unknown_package)}")
-    requirements = package.get("requirements", [])
-    check(isinstance(requirements, list), f"{plugin}: package requirements must be an array")
-    for requirement in requirements:
-        validate_requirement(requirement, f"{plugin} package")
-    definition = manifest.get("plugin")
-    check(isinstance(definition, dict), f"{plugin}: plugin.toml needs a [plugin] table")
+    commands = manifest.get("commands")
+    check(isinstance(commands, list) and commands, f"{plugin}: plugin.toml needs nonempty [[commands]]")
+    if "display_name" in package:
+        title = package["display_name"]
+        check(isinstance(title, str) and title.strip(), f"{plugin}: package display_name must not be empty")
+        check(requires_supported_sofka(package["sofka"], (0, 27, 1, True)),
+              f"{plugin}: package display_name requires sofka >=0.27.1")
+    else:
+        check(len(commands) == 1, f"{plugin}: multiple commands require [package].display_name")
+    seen = {field: set() for field in ("name", "palette", "key")}
+    for definition in commands:
+        check(isinstance(definition, dict), f"{plugin}: command must be a table")
+        validate_definition(plugin, definition)
+        for field, values in seen.items():
+            if field in definition and (field != "key" or definition[field]):
+                check(definition[field] not in values, f"{plugin}: duplicate command {field}")
+                values.add(definition[field])
+    package_requirements(package, commands, plugin)
+    return commands
+
+
+def validate_definition(plugin: str, definition: dict[str, object]) -> dict[str, object]:
     unknown = sorted(definition.keys() - PLUGIN_FIELDS)
     check(not unknown, f"{plugin}: unknown manifest fields {', '.join(unknown)}")
     for field in ("name", "command"):
         value = definition.get(field)
         check(isinstance(value, str) and value.strip() != "", f"{plugin}: manifest {field} must not be empty")
+    check(isinstance(definition.get("key", ""), str), f"{plugin}: key must be a string")
     palette = definition.get("palette")
     check(palette is not None or definition.get("key"), f"{plugin}: manifest needs a palette command or a key")
     if palette is not None:
@@ -508,7 +619,7 @@ def validate_sources(index: dict[str, object]) -> None:
     for plugin in plugin_ids():
         path = PLUGINS / plugin
         check(ID.fullmatch(plugin) is not None, f"invalid plugin directory {plugin!r}")
-        definition = manifest(plugin)["plugin"]
+        definitions = manifest(plugin)["commands"]
         metadata = publication(plugin)
         check(valid_version(metadata["version"]), f"{plugin}: invalid version")
         cargo = tomllib.loads((path / "Cargo.toml").read_text(encoding="utf-8"))
@@ -519,13 +630,12 @@ def validate_sources(index: dict[str, object]) -> None:
             cargo_license = workspace["workspace"]["package"]["license"]
         check(cargo_license == metadata["license"], f"{plugin}: Cargo and plugin.toml licenses differ")
         validate_execution(metadata, f"{plugin} package", published=False)
-        # The archive always names the adapter the same thing, so the manifest
-        # has exactly one correct spelling of its own command.
-        check(definition["command"] == f"./{ADAPTER}", f"{plugin}: command must be ./{ADAPTER}")
-        check("mutating" in definition, f"{plugin}: declare mutating explicitly")
-        check(all(not name.startswith("./") for name in definition.get("requires", [])), f"{plugin}: requires must name tools on PATH, not package files")
-        if definition.get("requires"):
-            check(bool(str(definition.get("install", "")).strip()), f"{plugin}: requires needs install instructions")
+        for definition in definitions:
+            check(definition["command"] == f"./{ADAPTER}", f"{plugin}: command must be ./{ADAPTER}")
+            check("mutating" in definition, f"{plugin}: declare mutating explicitly")
+            check(all(not name.startswith("./") for name in definition.get("requires", [])), f"{plugin}: requires must name tools on PATH, not package files")
+            if definition.get("requires"):
+                check(bool(str(definition.get("install", "")).strip()), f"{plugin}: requires needs install instructions")
         check(metadata["readme"] == "README.md", f"{plugin}: readme must be README.md")
         check((path / "README.md").is_file(), f"{plugin}: missing README.md")
         # Every package is published under the repository's dual licence, which
@@ -704,6 +814,7 @@ def update_index(args: argparse.Namespace) -> None:
             check(existing == release, f"{plugin_id}@{version} already exists with different bytes")
         else:
             plugin["versions"].append(release)
+    index["schema_version"] = 2
     index["plugins"].sort(key=lambda plugin: plugin["id"])
     index["generated_at"] = datetime.datetime.now(datetime.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     validate_index(index)

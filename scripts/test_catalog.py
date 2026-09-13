@@ -57,9 +57,9 @@ def manifest(package: dict[str, object] | None = None, **changes: object) -> dic
     value = tomllib.loads(MANIFEST.read_text(encoding="utf-8"))
     for field, setting in changes.items():
         if setting is None:
-            value["plugin"].pop(field, None)
+            value["commands"][0].pop(field, None)
         else:
-            value["plugin"][field] = setting
+            value["commands"][0][field] = setting
     for field, setting in (package or {}).items():
         if setting is None:
             value["package"].pop(field, None)
@@ -81,6 +81,128 @@ def check_index_rules() -> None:
     rejects("an empty command", lambda: catalog.validate_index(index(command="   ")))
     rejects("a plaintext README", lambda: catalog.validate_index(index(readme="http://example.invalid")))
     rejects("a withdrawal without a reason", lambda: catalog.validate_index(index(status="withdrawn")))
+
+
+def command_index() -> dict[str, object]:
+    value = index()
+    value["schema_version"] = 2
+    release = value["plugins"][0]["versions"][0]
+    first = {field: release.pop(field) for field in catalog.EXECUTION_FIELDS}
+    first.update(name="Status", palette="cert-manager-status", args=["status"], scopes=["certificates"])
+    second = dict(first, name="Renew", palette="cert-manager-renew", args=["renew"], mutating=True, confirm=True)
+    release.update(sofka=">=0.27.0", commands=[first, second])
+    return value
+
+
+def check_command_packages() -> None:
+    import copy
+
+    accepts("command catalog", lambda: catalog.validate_index(command_index()))
+    accepts("command catalog schema", lambda: catalog.validate_schema(command_index(), SCHEMA, SCHEMA, "index"))
+    mixed = command_index()
+    old = index()["plugins"][0]["versions"][0]
+    old["version"] = "0.0.1"
+    mixed["plugins"][0]["versions"].append(old)
+    accepts("old releases in schema 2", lambda: catalog.validate_index(mixed))
+    accepts("old releases in schema 2 schema", lambda: catalog.validate_schema(mixed, SCHEMA, SCHEMA, "index"))
+    for label, mutate in [
+        ("schema 1 with commands", lambda v, r: v.update(schema_version=1)),
+        ("empty commands", lambda v, r: r.update(commands=[])),
+        ("mixed execution fields", lambda v, r: r.update(mutating=False)),
+        ("old client range", lambda v, r: r.update(sofka=">=0.26.0")),
+        ("duplicate palette", lambda v, r: r["commands"][1].update(palette="cert-manager-status")),
+        ("duplicate name", lambda v, r: r["commands"][1].update(name="Status")),
+        ("second command mutation type", lambda v, r: r["commands"][1].update(mutating="false")),
+        ("second command missing mutation", lambda v, r: r["commands"][1].pop("mutating")),
+        ("second command invalid scopes", lambda v, r: r["commands"][1].update(scopes="certificates")),
+    ]:
+        value = command_index()
+        mutate(value, value["plugins"][0]["versions"][0])
+        rejects(label, lambda value=value: catalog.validate_index(value))
+    wrong_schema = command_index()
+    wrong_schema["schema_version"] = 1
+    rejects("schema 1 command arrays in JSON Schema", lambda: catalog.validate_schema(wrong_schema, SCHEMA, SCHEMA, "index"))
+    value = manifest()
+    second = copy.deepcopy(value["commands"][0])
+    second.update(name="Another command", palette="another-command", mutating=True, confirm=True)
+    value["commands"].append(second)
+    accepts("two manifest commands", lambda: catalog.validate_manifest("example", value))
+    for label, change in [
+        ("duplicate manifest palette", {"palette": value["commands"][0]["palette"]}),
+        ("invalid second manifest command", {"output": "terminal"}),
+    ]:
+        invalid = copy.deepcopy(value)
+        invalid["commands"][1].update(change)
+        rejects(label, lambda invalid=invalid: catalog.validate_manifest("example", invalid))
+    invalid = copy.deepcopy(value)
+    invalid["plugin"] = invalid["commands"][0]
+    rejects("mixed manifest formats", lambda: catalog.validate_manifest("example", invalid))
+    invalid = copy.deepcopy(value)
+    invalid["commands"] = []
+    rejects("empty manifest commands", lambda: catalog.validate_manifest("example", invalid))
+
+
+def check_package_titles_and_shared_requirements() -> None:
+    source = MANIFEST.read_text().replace('display_name = "Resource summary"', 'display_name = "Certificate tools"')
+    source = source.replace('requires = []', 'requires = ["cmctl"]\ninstall = "Install cmctl"')
+    second = '''
+[[commands]]
+name = "Renew certificate"
+palette = "cert-manager-renew"
+command = "./adapter"
+requires = ["cmctl", "kubectl"]
+install = "Install cmctl"
+output = "report"
+mutating = true
+confirm = true
+'''
+    with tempfile.TemporaryDirectory() as directory:
+        root = pathlib.Path(directory)
+        package = root / "certificate-tools"
+        package.mkdir()
+        original, catalog.PLUGINS = catalog.PLUGINS, root
+        def publish(text):
+            (package / "plugin.toml").write_text(text)
+            return catalog.publication("certificate-tools")
+        try:
+            single = publish(source)
+            multiple = publish(source + second)
+            if single["display_name"] != "Certificate tools" or multiple["display_name"] != single["display_name"]:
+                FAILURES.append("package title changed when a command was added")
+            prefix, first = source.split("[[commands]]", 1)
+            reordered = publish(prefix + second + "\n[[commands]]" + first)
+            if reordered["display_name"] != "Certificate tools":
+                FAILURES.append("package title changed when commands were reordered")
+            expected = [{"name": "cmctl", "install": "Install cmctl"}, {"name": "kubectl", "install": "Install cmctl"}]
+            if multiple["requirements"] != expected:
+                FAILURES.append(f"shared requirements published as {multiple['requirements']!r}")
+            rejects("conflicting command installation instructions", lambda: publish(source + second.replace("Install cmctl", "Install another tool")))
+            explicit = '[package]\nrequirements = [{name = "cmctl", install = "Install the package tool", alternatives = ["kubectl-cm"]}, {name = "cmctl", install = "Install the package tool", alternatives = ["kubectl-cm"]}]'
+            override = publish((source + second).replace("[package]", explicit))
+            if override["requirements"] != [{"name": "cmctl", "install": "Install the package tool", "alternatives": ["kubectl-cm"]}]:
+                FAILURES.append("explicit shared requirement metadata was lost or duplicated")
+            conflicting = '[package]\nrequirements = [{name = "cmctl", install = "Install cmctl", alternatives = ["kubectl-cm"]}, {name = "cmctl", install = "Install cmctl"}]'
+            rejects("conflicting package requirement alternatives", lambda: publish(source.replace("[package]", conflicting)))
+            conflicting = '[package]\nrequirements = [{name = "cmctl", install = "Install cmctl"}, {name = "cmctl", install = "Install another tool"}]'
+            rejects("conflicting package requirement instructions", lambda: publish(source.replace("[package]", conflicting)))
+            identical = '[package]\nrequirements = [{name = "cmctl", install = "Install cmctl"}, {name = "cmctl", install = "Install cmctl", alternatives = []}]'
+            if publish(source.replace("[package]", identical))["requirements"] != [{"name": "cmctl", "install": "Install cmctl"}]:
+                FAILURES.append("an empty alternatives list prevented requirement aggregation")
+            untitled = source.replace('display_name = "Certificate tools"\n', "")
+            if publish(untitled)["display_name"] != "Resource summary":
+                FAILURES.append("single-command package lost its display-name fallback")
+            rejects("multiple commands without a package title", lambda: publish(untitled + second))
+            for invalid in ['""', '"   "', 'false']:
+                rejects("an invalid package title", lambda invalid=invalid: publish(source.replace('display_name = "Certificate tools"', f'display_name = {invalid}')))
+            rejects("package title on an older Sofka client", lambda: publish(source.replace(">=0.27.1", ">=0.27.0")))
+            accepts("an untitled package for Sofka 0.27.0", lambda: publish(untitled.replace(">=0.27.1", ">=0.27.0")))
+        finally:
+            catalog.PLUGINS = original
+    value = command_index()
+    value["plugins"][0]["versions"][0]["requirements"] = [{"name": "cmctl", "install": "Install cmctl"}] * 2
+    rejects("duplicate published command requirements", lambda: catalog.validate_index(value))
+    value["plugins"][0]["versions"][0]["requirements"][1] = {"name": "cmctl", "install": "Install another tool"}
+    rejects("conflicting published command requirements", lambda: catalog.validate_index(value))
 
 
 def check_version_ranges() -> None:
@@ -138,6 +260,13 @@ def check_version_ranges() -> None:
     for value in [">=0.25.5", ">=0.26.0-alpha.1", "<1.0.0", "*"]:
         if catalog.requires_supported_sofka(value):
             FAILURES.append(f"accepted the pre-0.26 sofka range {value!r}")
+
+    for value in [">=0.27.1", "=0.27.1", "^0.27.1", "~0.27.1", ">0.27.0", ">0.27", ">=0.28", "1.*", ">=1", ">=0.27.1, <1", ">=0.27.1-alpha, >=0.27.1"]:
+        if not catalog.requires_supported_sofka(value, (0, 27, 1, True)):
+            FAILURES.append(f"rejected the package-title range {value!r}")
+    for value in ["*", ">=0.27.0", "=0.26.0", "^0.27", "0.27.*", "~0.27.0", "<1", "<=0.27.1", ">0.26", ">=0.27.1-alpha", ">0.27.0, <0.27.1-beta", "latest"]:
+        if catalog.requires_supported_sofka(value, (0, 27, 1, True)):
+            FAILURES.append(f"accepted the incompatible package-title range {value!r}")
 
     for value in ["0.1.0", "1.2.3-alpha.1+build.01", f"{2**64 - 1}.0.0"]:
         if not catalog.valid_version(value):
@@ -467,7 +596,8 @@ def check_index_generation() -> None:
             payload[platform] = f"bytes for {platform}".encode()
             (assets / name).write_bytes(payload[platform])
         index = root / "index.json"
-        index.write_text(json.dumps({"schema_version": 1, "generated_at": "x", "plugins": []}))
+        previous = json.loads(FIXTURE.read_text())
+        index.write_text(json.dumps(previous))
 
         original_index, catalog.INDEX = catalog.INDEX, index
         try:
@@ -482,7 +612,11 @@ def check_index_generation() -> None:
                 "the generated index against the schema",
                 lambda: catalog.validate_schema(written, SCHEMA, SCHEMA, "index"),
             )
-            release = written["plugins"][0]["versions"][0]
+            if catalog.releases(written).get(("resource-summary", "0.1.0")) != catalog.releases(previous).get(("resource-summary", "0.1.0")):
+                FAILURES.append("command publication modified the existing release")
+            if written["schema_version"] != 2:
+                FAILURES.append("command publication did not set catalog schema 2")
+            release = catalog.releases(written)[("resource-summary", version)]
             if release["source_commit"] != commit:
                 FAILURES.append("generated release does not record the source commit")
             if release["status"] != "active" or "withdrawal_reason" in release:
@@ -530,11 +664,11 @@ def check_source_rules() -> None:
     # The mapping is what matters, not the values a package happens to carry.
     for plugin in catalog.plugin_ids():
         authored = catalog.manifest(plugin)
-        package, definition = authored["package"], authored["plugin"]
+        package, definitions = authored["package"], authored["commands"]
         derived = catalog.publication(plugin)
         expected = {
             "id": plugin,
-            "display_name": definition["name"],
+            "display_name": package.get("display_name", definitions[0]["name"]),
             "description": package["description"],
             "publisher": ", ".join(package["authors"]),
             "repository": package["repository"],
@@ -544,15 +678,17 @@ def check_source_rules() -> None:
             "readme": package["readme"],
             "tags": package.get("tags", []),
             "platforms": package["platforms"],
-            "command": definition["command"],
-            "target": definition.get("target", "selection"),
-            "output": definition["output"],
-            "mutating": definition["mutating"],
-            "confirm": definition.get("confirm", False),
-            "dangerous": definition.get("dangerous", False),
-            "network_load": definition.get("network_load", False),
+            "commands": [{
+                "name": definition["name"], "palette": definition["palette"],
+                "command": definition["command"], "args": definition.get("args", []),
+                "scopes": definition.get("scopes", []), "target": definition.get("target", "selection"),
+                "output": definition["output"], "mutating": definition["mutating"],
+                "confirm": definition.get("confirm", False), "dangerous": definition.get("dangerous", False),
+                "network_load": definition.get("network_load", False),
+            } for definition in definitions],
             "requirements": package.get("requirements", [
                 {"name": name, "install": definition.get("install", "")}
+                for definition in definitions
                 for name in definition.get("requires", [])
             ]),
         }
@@ -598,6 +734,8 @@ def check_source_rules() -> None:
 
 def main() -> None:
     check_index_rules()
+    check_command_packages()
+    check_package_titles_and_shared_requirements()
     check_schema_rules()
     check_version_ranges()
     check_manifest_rules()
