@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "sections": [
+    {
+      "columns": [
+        "Field",
+        "Value"
+      ],
+      "rows": [
+        [
+          "Verdict",
+          "dry run, nothing was renewed"
+        ],
+        [
+          "Context",
+          "development"
+        ],
+        [
+          "Namespace",
+          "apps"
+        ],
+        [
+          "Certificate",
+          "web-tls"
+        ]
+      ],
+      "title": "Summary"
+    },
+    {
+      "lines": [
+        "cmctl renew web-tls --namespace apps --context development"
+      ],
+      "title": "Command"
+    },
+    {
+      "lines": [
+        "Re-run with dry_run=false to mark the Certificate for renewal."
+      ],
+      "title": "Notice"
+    }
+  ],
+  "title": "Renew certificate"
+}

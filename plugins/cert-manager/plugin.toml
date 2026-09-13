@@ -1,0 +1,92 @@
+schema_version = 2
+
+[package]
+display_name = "cert-manager"
+version = "0.1.0"
+authors = ["zoispag"]
+license = "MIT OR Apache-2.0"
+description = "Show the status of a cert-manager Certificate, inspect the certificate in a TLS Secret, and request a renewal with cmctl."
+repository = "https://github.com/nklmilojevic/sofka-plugins"
+readme = "README.md"
+sofka = ">=0.27.1"
+platforms = [
+  "x86_64-unknown-linux-gnu",
+  "aarch64-unknown-linux-gnu",
+  "x86_64-apple-darwin",
+  "aarch64-apple-darwin",
+]
+tags = ["cert-manager", "tls", "certificates", "secrets", "x509", "renew", "report"]
+
+# cmctl is shared by status and renew; kubectl is used only by inspect.
+[[package.requirements]]
+name = "cmctl"
+install = "Install cmctl from https://cert-manager.io/docs/reference/cmctl/#installation"
+
+[[package.requirements]]
+name = "kubectl"
+install = "Install kubectl from https://kubernetes.io/docs/tasks/tools/"
+
+[[commands]]
+name = "Certificate status"
+palette = "cert-manager-status"
+command = "./adapter"
+args = ["status"]
+requires = ["cmctl"]
+install = "Install cmctl from https://cert-manager.io/docs/reference/cmctl/#installation"
+scopes = ["certificates"]
+target = "selection"
+output = "report"
+# `cmctl status certificate` only reads the Certificate and the resources
+# around it, so it stays available under --readonly.
+mutating = false
+# cmctl fetches the Certificate, its issuer, secret, CertificateRequest, Order
+# and Challenges one after another.
+timeout = "1m"
+
+[commands.inputs.replay]
+type = "string"
+default = ""
+
+[[commands]]
+name = "Inspect TLS secret"
+palette = "cert-manager-inspect"
+command = "./adapter"
+args = ["inspect"]
+# The adapter decodes the certificate itself. kubectl is only used when the
+# request does not carry the Secret data.
+requires = ["kubectl"]
+install = "Install kubectl from https://kubernetes.io/docs/tasks/tools/"
+scopes = ["secrets"]
+target = "selection"
+output = "report"
+# Reads one Secret and parses its certificate offline. No network requests
+# to the certificate's CRL or OCSP endpoints, so it stays available under
+# --readonly.
+mutating = false
+timeout = "30s"
+
+[commands.inputs.replay]
+type = "string"
+default = ""
+
+[[commands]]
+name = "Renew certificate"
+palette = "cert-manager-renew"
+command = "./adapter"
+args = ["renew"]
+requires = ["cmctl"]
+install = "Install cmctl from https://cert-manager.io/docs/reference/cmctl/#installation"
+scopes = ["certificates"]
+target = "selection"
+output = "report"
+# Sets the Issuing condition on the Certificate, which makes cert-manager
+# request a new certificate: blocked in read-only mode and confirmed every
+# time. Not marked dangerous, because the current certificate keeps working
+# until the new one is issued.
+mutating = true
+confirm = true
+timeout = "30s"
+
+[commands.inputs.dry_run]
+type = "boolean"
+default = "false"

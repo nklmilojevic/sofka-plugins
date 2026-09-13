@@ -9,6 +9,7 @@ GitHub Release assets and are never committed to Git.
 
 | Package                                        | Needs                                                  |
 | ---------------------------------------------- | ------------------------------------------------------ |
+| [`cert-manager`](plugins/cert-manager)         | [cmctl](https://cert-manager.io/docs/reference/cmctl/) and `kubectl` on `PATH`; **renews certificates** |
 | [`chaos-kill`](plugins/chaos-kill)             | `kubectl` on `PATH` — **deletes pods**                 |
 | [`oha`](plugins/oha)                           | [oha](https://github.com/hatoo/oha) on `PATH`          |
 | [`popeye`](plugins/popeye)                     | [Popeye](https://github.com/derailed/popeye) on `PATH` |

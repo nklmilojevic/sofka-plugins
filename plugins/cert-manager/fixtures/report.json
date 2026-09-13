@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "sections": [
+    {
+      "columns": [
+        "Field",
+        "Value"
+      ],
+      "rows": [
+        [
+          "Context",
+          "development"
+        ],
+        [
+          "Name",
+          "web-tls"
+        ],
+        [
+          "Namespace",
+          "apps"
+        ],
+        [
+          "Created at",
+          "2026-08-01T10:00:00+02:00"
+        ],
+        [
+          "Events",
+          "<none>"
+        ],
+        [
+          "Not Before",
+          "2026-07-14T09:00:00+02:00"
+        ],
+        [
+          "Not After",
+          "2026-10-12T08:59:59+02:00"
+        ],
+        [
+          "Renewal Time",
+          "2026-09-12T10:00:00+02:00"
+        ]
+      ],
+      "title": "Summary"
+    },
+    {
+      "lines": [
+        "Issuing: True, Reason: Renewing, Message: Renewing certificate as renewal was scheduled at 2026-09-12 08:00:00 +0000 UTC",
+        "Ready: True, Reason: Ready, Message: Certificate is up to date and has not expired"
+      ],
+      "title": "Conditions"
+    },
+    {
+      "lines": [
+        "- web.example.com",
+        "- www.example.com"
+      ],
+      "title": "DNS Names"
+    },
+    {
+      "lines": [
+        "Name: letsencrypt",
+        "Kind: ClusterIssuer",
+        "Conditions:",
+        "  Ready: True, Reason: ACMEAccountRegistered, Message: The ACME account was registered with the ACME server",
+        "Events: <none>"
+      ],
+      "title": "Issuer"
+    },
+    {
+      "lines": [
+        "Name: web-tls",
+        "Issuer Country: US",
+        "Issuer Organisation: Let's Encrypt",
+        "Issuer Common Name: R13",
+        "Key Usage: Digital Signature",
+        "Extended Key Usages: Server Authentication",
+        "Public Key Algorithm: RSA",
+        "Signature Algorithm: SHA256-RSA",
+        "Subject Key ID:",
+        "Authority Key ID: 1f2f35be461482cd40b1ae792c5578faf7d468fb",
+        "Serial Number: 04f1a2b3c4d5e6f708192a3b4c5d6e7f8091",
+        "Events: <none>"
+      ],
+      "title": "Secret"
+    },
+    {
+      "lines": [
+        "Name: web-tls-1",
+        "Namespace: apps",
+        "Conditions:",
+        "  Approved: True, Reason: cert-manager.io, Message: Certificate request has been approved by cert-manager.io",
+        "  Ready: False, Reason: Pending, Message: Waiting on certificate issuance from order apps/web-tls-1-2: \"pending\"",
+        "Events: <none>"
+      ],
+      "title": "CertificateRequest"
+    },
+    {
+      "lines": [
+        "Name: web-tls-1-2",
+        "State: pending, Reason:",
+        "Authorizations:",
+        "  URL: https://acme-v02.api.letsencrypt.org/acme/authz-v3/1, Identifier: web.example.com, Initial State: pending, Wildcard: false",
+        "  URL: https://acme-v02.api.letsencrypt.org/acme/authz-v3/2, Identifier: www.example.com, Initial State: pending, Wildcard: false"
+      ],
+      "title": "Order"
+    },
+    {
+      "lines": [
+        "- Name: web-tls-1-2-3, Type: DNS-01, Token: tok3n, Key: k3y, State: pending, Reason: Waiting for DNS-01 challenge propagation, Processing: true, Presented: true",
+        "- Name: web-tls-1-2-4, Type: DNS-01, Token: tok3n, Key: k3y, State: pending, Reason: Waiting for DNS-01 challenge propagation, Processing: true, Presented: true"
+      ],
+      "title": "Challenges"
+    }
+  ],
+  "title": "Certificate status"
+}
