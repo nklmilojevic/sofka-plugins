@@ -18,7 +18,17 @@ add a `[plugin]` table. Command names, palette names, and nonempty key chords
 must be unique within a package. All commands use `./adapter`; use `args` to
 select the action when an adapter provides several actions.
 
-Command packages require Sofka `>=0.27.0`. Publish them only after the Sofka
+Set `[package].display_name` to the package title shown in the catalog. The title
+does not depend on the number or order of commands. A package with several
+commands must declare this field. For a package with one command, the command's
+name remains the fallback when the field is absent.
+
+Publication combines command requirements by executable name. Repeated records
+with the same metadata become one record. Conflicting installation instructions
+or alternatives cause validation to fail. An explicit `[package].requirements`
+list takes precedence over command requirements and follows the same rules.
+
+Command packages require Sofka `>=0.27.1`. Publish them only after the Sofka
 release that includes manifest schema 2 support. Installation, update, and
 removal apply to the whole package. The adapter request and report protocols
 still use schema version `1`.

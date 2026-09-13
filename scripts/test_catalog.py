@@ -142,6 +142,69 @@ def check_command_packages() -> None:
     rejects("empty manifest commands", lambda: catalog.validate_manifest("example", invalid))
 
 
+def check_package_titles_and_shared_requirements() -> None:
+    source = MANIFEST.read_text().replace('display_name = "Resource summary"', 'display_name = "Certificate tools"')
+    source = source.replace('requires = []', 'requires = ["cmctl"]\ninstall = "Install cmctl"')
+    second = '''
+[[commands]]
+name = "Renew certificate"
+palette = "cert-manager-renew"
+command = "./adapter"
+requires = ["cmctl", "kubectl"]
+install = "Install cmctl"
+output = "report"
+mutating = true
+confirm = true
+'''
+    with tempfile.TemporaryDirectory() as directory:
+        root = pathlib.Path(directory)
+        package = root / "certificate-tools"
+        package.mkdir()
+        original, catalog.PLUGINS = catalog.PLUGINS, root
+        def publish(text):
+            (package / "plugin.toml").write_text(text)
+            return catalog.publication("certificate-tools")
+        try:
+            single = publish(source)
+            multiple = publish(source + second)
+            if single["display_name"] != "Certificate tools" or multiple["display_name"] != single["display_name"]:
+                FAILURES.append("package title changed when a command was added")
+            prefix, first = source.split("[[commands]]", 1)
+            reordered = publish(prefix + second + "\n[[commands]]" + first)
+            if reordered["display_name"] != "Certificate tools":
+                FAILURES.append("package title changed when commands were reordered")
+            expected = [{"name": "cmctl", "install": "Install cmctl"}, {"name": "kubectl", "install": "Install cmctl"}]
+            if multiple["requirements"] != expected:
+                FAILURES.append(f"shared requirements published as {multiple['requirements']!r}")
+            rejects("conflicting command installation instructions", lambda: publish(source + second.replace("Install cmctl", "Install another tool")))
+            explicit = '[package]\nrequirements = [{name = "cmctl", install = "Install the package tool", alternatives = ["kubectl-cm"]}, {name = "cmctl", install = "Install the package tool", alternatives = ["kubectl-cm"]}]'
+            override = publish((source + second).replace("[package]", explicit))
+            if override["requirements"] != [{"name": "cmctl", "install": "Install the package tool", "alternatives": ["kubectl-cm"]}]:
+                FAILURES.append("explicit shared requirement metadata was lost or duplicated")
+            conflicting = '[package]\nrequirements = [{name = "cmctl", install = "Install cmctl", alternatives = ["kubectl-cm"]}, {name = "cmctl", install = "Install cmctl"}]'
+            rejects("conflicting package requirement alternatives", lambda: publish(source.replace("[package]", conflicting)))
+            conflicting = '[package]\nrequirements = [{name = "cmctl", install = "Install cmctl"}, {name = "cmctl", install = "Install another tool"}]'
+            rejects("conflicting package requirement instructions", lambda: publish(source.replace("[package]", conflicting)))
+            identical = '[package]\nrequirements = [{name = "cmctl", install = "Install cmctl"}, {name = "cmctl", install = "Install cmctl", alternatives = []}]'
+            if publish(source.replace("[package]", identical))["requirements"] != [{"name": "cmctl", "install": "Install cmctl"}]:
+                FAILURES.append("an empty alternatives list prevented requirement aggregation")
+            untitled = source.replace('display_name = "Certificate tools"\n', "")
+            if publish(untitled)["display_name"] != "Resource summary":
+                FAILURES.append("single-command package lost its display-name fallback")
+            rejects("multiple commands without a package title", lambda: publish(untitled + second))
+            for invalid in ['""', '"   "', 'false']:
+                rejects("an invalid package title", lambda invalid=invalid: publish(source.replace('display_name = "Certificate tools"', f'display_name = {invalid}')))
+            rejects("package title on an older Sofka client", lambda: publish(source.replace(">=0.27.1", ">=0.27.0")))
+            accepts("an untitled package for Sofka 0.27.0", lambda: publish(untitled.replace(">=0.27.1", ">=0.27.0")))
+        finally:
+            catalog.PLUGINS = original
+    value = command_index()
+    value["plugins"][0]["versions"][0]["requirements"] = [{"name": "cmctl", "install": "Install cmctl"}] * 2
+    rejects("duplicate published command requirements", lambda: catalog.validate_index(value))
+    value["plugins"][0]["versions"][0]["requirements"][1] = {"name": "cmctl", "install": "Install another tool"}
+    rejects("conflicting published command requirements", lambda: catalog.validate_index(value))
+
+
 def check_version_ranges() -> None:
     """The accepted range syntax must match sofka's semver parser exactly. A
     range CI accepts but the client rejects makes the client refuse the whole
@@ -598,7 +661,7 @@ def check_source_rules() -> None:
         derived = catalog.publication(plugin)
         expected = {
             "id": plugin,
-            "display_name": definitions[0]["name"] if len(definitions) == 1 else plugin,
+            "display_name": package.get("display_name", definitions[0]["name"]),
             "description": package["description"],
             "publisher": ", ".join(package["authors"]),
             "repository": package["repository"],
@@ -665,6 +728,7 @@ def check_source_rules() -> None:
 def main() -> None:
     check_index_rules()
     check_command_packages()
+    check_package_titles_and_shared_requirements()
     check_schema_rules()
     check_version_ranges()
     check_manifest_rules()

@@ -109,7 +109,7 @@ def plugin_ids() -> list[str]:
 
 
 ADAPTER = "adapter"
-PACKAGE_FIELDS = {"version", "authors", "license", "description", "repository", "readme", "sofka", "platforms", "tags", "requirements"}
+PACKAGE_FIELDS = {"version", "display_name", "authors", "license", "description", "repository", "readme", "sofka", "platforms", "tags", "requirements"}
 REQUIRED_PACKAGE_FIELDS = {"version", "authors", "license", "description", "repository", "readme", "sofka", "platforms"}
 
 
@@ -127,7 +127,7 @@ def publication(plugin: str) -> dict[str, object]:
     package, definitions = value["package"], value["commands"]
     return {
         "id": plugin,
-        "display_name": definitions[0]["name"] if len(definitions) == 1 else plugin,
+        "display_name": package.get("display_name", definitions[0]["name"]),
         "description": package["description"],
         "tags": package.get("tags", []),
         "publisher": ", ".join(package["authors"]),
@@ -136,11 +136,7 @@ def publication(plugin: str) -> dict[str, object]:
         "sofka": package["sofka"],
         "license": package["license"],
         "readme": package["readme"],
-        "requirements": package.get("requirements", [
-            {"name": name, "install": definition.get("install", "")}
-            for definition in definitions
-            for name in definition.get("requires", [])
-        ]),
+        "requirements": package_requirements(package, definitions, plugin),
         "commands": [command_metadata(definition) for definition in definitions],
         "platforms": package["platforms"],
     }
@@ -385,6 +381,32 @@ def validate_requirement(requirement: object, label: str) -> None:
     check(len(set(alternatives)) == len(alternatives) and name not in alternatives, f"{label}: duplicate requirement alternative")
 
 
+def aggregate_requirements(requirements: object, label: str) -> list[dict[str, object]]:
+    """Keep one record per tool and reject conflicting installation metadata."""
+    check(isinstance(requirements, list), f"{label}: requirements must be an array")
+    by_name: dict[str, dict[str, object]] = {}
+    for requirement in requirements:
+        validate_requirement(requirement, label)
+        normalized = {"name": requirement["name"], "install": requirement["install"]}
+        if requirement.get("alternatives"):
+            normalized["alternatives"] = requirement["alternatives"]
+        name = normalized["name"]
+        check(name not in by_name or by_name[name] == normalized,
+              f"{label}: conflicting metadata for requirement {name!r}")
+        by_name[name] = normalized
+    return list(by_name.values())
+
+
+def package_requirements(package: dict[str, object], commands: list[dict[str, object]], label: str) -> list[dict[str, object]]:
+    if "requirements" in package:
+        return aggregate_requirements(package["requirements"], label)
+    return aggregate_requirements([
+        {"name": name, "install": command.get("install", "")}
+        for command in commands
+        for name in command.get("requires", [])
+    ], label)
+
+
 def validate_execution(value: dict[str, object], label: str, published: bool = True) -> None:
     """The runtime fields an authored package and its catalog release record
     share. A manifest names its README by filename; publication turns that into
@@ -401,8 +423,12 @@ def validate_execution(value: dict[str, object], label: str, published: bool = T
     else:
         validate_command_execution(value, label)
     check(isinstance(value["requirements"], list), f"{label}: requirements must be an array")
-    for requirement in value["requirements"]:
-        validate_requirement(requirement, label)
+    if "commands" in value:
+        requirements = aggregate_requirements(value["requirements"], label)
+        check(len(requirements) == len(value["requirements"]), f"{label}: duplicate requirement names")
+    else:
+        for requirement in value["requirements"]:
+            validate_requirement(requirement, label)
 
 
 def validate_index(index: dict[str, object]) -> None:
@@ -498,12 +524,15 @@ def validate_manifest(plugin: str, manifest: dict[str, object]) -> list[dict[str
     required(package, REQUIRED_PACKAGE_FIELDS, f"{plugin} package")
     unknown_package = sorted(package.keys() - PACKAGE_FIELDS)
     check(not unknown_package, f"{plugin} package: unknown fields {', '.join(unknown_package)}")
-    requirements = package.get("requirements", [])
-    check(isinstance(requirements, list), f"{plugin}: package requirements must be an array")
-    for requirement in requirements:
-        validate_requirement(requirement, f"{plugin} package")
     commands = manifest.get("commands")
     check(isinstance(commands, list) and commands, f"{plugin}: plugin.toml needs nonempty [[commands]]")
+    if "display_name" in package:
+        title = package["display_name"]
+        check(isinstance(title, str) and title.strip(), f"{plugin}: package display_name must not be empty")
+        check(requires_supported_sofka(package["sofka"], (0, 27, 1, True)),
+              f"{plugin}: package display_name requires sofka >=0.27.1")
+    else:
+        check(len(commands) == 1, f"{plugin}: multiple commands require [package].display_name")
     seen = {field: set() for field in ("name", "palette", "key")}
     for definition in commands:
         check(isinstance(definition, dict), f"{plugin}: command must be a table")
@@ -512,6 +541,7 @@ def validate_manifest(plugin: str, manifest: dict[str, object]) -> list[dict[str
             if field in definition and (field != "key" or definition[field]):
                 check(definition[field] not in values, f"{plugin}: duplicate command {field}")
                 values.add(definition[field])
+    package_requirements(package, commands, plugin)
     return commands
 
 
