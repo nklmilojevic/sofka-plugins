@@ -9,8 +9,8 @@ every time.
 
 ## This one generates traffic
 
-Every other package in this catalog only reads. This one puts a workload under
-sustained load, so its manifest sets `network_load = true`. Sofka treats that
+This plugin puts a workload under sustained load, so its manifest sets
+`network_load = true`. Sofka treats that
 as it would a destructive action: it confirms before each run, marks the
 confirmation dialog, and refuses entirely in read-only mode. Point it at
 production only when you mean to.
@@ -32,11 +32,30 @@ plane path — not only the selected workload.
 
 ## Dependencies
 
+Requires Sofka 0.27.2 or newer for live plugin activity.
+
 oha 1.9.0 or newer, on `PATH`; that release introduced the `--output-format`
 form used for JSON reports. See the
 [oha installation guide](https://github.com/hatoo/oha#installation). Sofka
 reports the requirement and where to get it; it never installs external tools
 for you.
+
+## Live activity
+
+The adapter writes plain-text activity to stderr. Sofka's activity popup shows
+the planned duration, configured connections and rate limit,
+and elapsed time while oha runs. The rate limit is not measured throughput.
+After the planned duration, the message says that oha is still running and the
+adapter is waiting for final results. Only the final JSON report contains
+measured throughput, latency, and request counts.
+
+Child diagnostics are forwarded as they arrive, up to 64 KiB. The adapter keeps
+draining after that limit and shows a truncation notice. Duration updates stop
+after six minutes, even if a manually invoked process runs longer. The manifest
+and report schemas are unchanged. The adapter does not print the target URL in
+activity messages. If activity cannot be written, the adapter still drains the
+child pipes and returns the final report. Child read and process failures remain
+errors.
 
 ## Inputs
 

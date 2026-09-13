@@ -3,10 +3,10 @@
 Three commands for [cert-manager](https://cert-manager.io) resources, in one
 package:
 
-| Command                 | Select a                   | Does                                                          | Changes the cluster |
-| ----------------------- | -------------------------- | ------------------------------------------------------------- | ------------------- |
-| `:cert-manager-status`  | Certificate                | Runs `cmctl status certificate` and shows the result.         | No                  |
-| `:cert-manager-inspect` | `kubernetes.io/tls` Secret | Decodes the X.509 certificate in `tls.crt` and shows it.      | No                  |
+| Command                 | Select a                   | Does                                                          | Changes the cluster    |
+| ----------------------- | -------------------------- | ------------------------------------------------------------- | ---------------------- |
+| `:cert-manager-status`  | Certificate                | Runs `cmctl status certificate` and shows the result.         | No                     |
+| `:cert-manager-inspect` | `kubernetes.io/tls` Secret | Decodes the X.509 certificate in `tls.crt` and shows it.      | No                     |
 | `:cert-manager-renew`   | Certificate                | Runs `cmctl renew`, which marks the Certificate for issuance. | Yes, with confirmation |
 
 With rows marked (`space`) each command runs once per marked resource.
@@ -89,13 +89,28 @@ object sofka selected:
 
 Anything else is refused with an error that names what was selected.
 
+## Live activity
+
+The adapter sends status, inspection, and renewal phase messages to stderr for
+Sofka's activity popup. It forwards up to 64 KiB of child-tool diagnostics, then
+shows a truncation notice and keeps draining. Secret JSON, PEM certificate bytes,
+and private-key data are not copied from stdout into activity messages.
+A failed activity write does not discard the final report, including after a
+renewal request. Child read and process failures remain errors.
+
+A renewal message distinguishes a submitted request from verified issuance. The
+adapter does not wait for a new certificate; use the status command to follow it.
+Dry-run messages explicitly state that no renewal is requested. Saved status and
+inspection replays do not claim to run live checks. Reports, schemas, confirmation,
+and read-only safeguards are unchanged.
+
 ## Inputs
 
-| Command                 | Input     | Default | Purpose                                                                        |
-| ----------------------- | --------- | ------- | ------------------------------------------------------------------------------ |
-| `:cert-manager-status`  | `replay`  | none    | Render saved `cmctl status certificate` output from this path instead of running cmctl. |
+| Command                 | Input     | Default | Purpose                                                                                   |
+| ----------------------- | --------- | ------- | ----------------------------------------------------------------------------------------- |
+| `:cert-manager-status`  | `replay`  | none    | Render saved `cmctl status certificate` output from this path instead of running cmctl.   |
 | `:cert-manager-inspect` | `replay`  | none    | Render saved `cmctl inspect secret` output from this path instead of decoding the Secret. |
-| `:cert-manager-renew`   | `dry_run` | `false` | Show the cmctl command that would run and renew nothing.                       |
+| `:cert-manager-renew`   | `dry_run` | `false` | Show the cmctl command that would run and renew nothing.                                  |
 
 ```text
 :cert-manager-status replay=/absolute/path/to/status.txt
@@ -108,6 +123,8 @@ a larger file is an error. The packaged fixture test uses the same replay path
 internally.
 
 ## Dependencies
+
+Requires Sofka 0.27.2 or newer for live plugin activity.
 
 - `cmctl` on `PATH` for `status` and `renew`, from
   https://cert-manager.io/docs/reference/cmctl/. It runs with your credentials

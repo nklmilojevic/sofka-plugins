@@ -68,6 +68,11 @@ jobs:
       - name: Test adapters
         if: needs.changes.outputs.plugins != '[]'
         run: cargo test --locked --workspace
+      - name: Test activity with mock tools and broken stderr
+        if: needs.changes.outputs.plugins != '[]'
+        run: |
+          cargo build --locked --workspace
+          python3 scripts/test_activity.py
 
   build:
     needs: [changes, validate]

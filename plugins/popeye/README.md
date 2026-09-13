@@ -9,6 +9,8 @@ so it stays available in read-only mode.
 
 ## Dependencies
 
+Requires Sofka 0.27.2 or newer for live plugin activity.
+
 Popeye itself, as `popeye` on `PATH`. Install it from the
 [Popeye installation guide](https://github.com/derailed/popeye#installation).
 Sofka reports the requirement and where to get it; it never installs external
@@ -18,6 +20,18 @@ The adapter runs Popeye with `--out json --force-exit-zero --log-level 0 --logs
 none`, and with `--context` and `--namespace` taken from the sofka session, or
 `--all-namespaces` when sofka is showing all namespaces. Popeye reads the same
 kubeconfig sofka does and scans with your permissions.
+
+## Live activity
+
+The adapter reports scan start and completion on stderr and forwards available
+Popeye diagnostics while the scan runs. Sofka's activity popup also shows elapsed
+time. There is no estimated percentage or invented per-linter progress. Logging
+flags stay unchanged, so quiet scans may only show the start message until they
+finish. Forwarded diagnostics stop after 64 KiB with a notice; the adapter keeps
+draining the pipe and preparing the report. Saved reports do not start a scan.
+Stdout remains the same JSON report, with no schema change. If activity cannot
+be written, capture and report processing continue. Child read and process
+failures remain errors.
 
 ## Inputs
 

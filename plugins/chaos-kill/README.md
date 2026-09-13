@@ -36,6 +36,20 @@ It reads `spec.selector.matchLabels` to find them. A selector using
 `matchExpressions` is refused rather than approximated — guessing would delete
 the wrong pods.
 
+## Live activity
+
+The adapter reports ownership and identity checks, dry-run selection, deletion
+requests, and recovery observations on stderr for Sofka's activity popup. Recovery
+updates use the controller's observed ready and desired replica counts plus elapsed
+time. A ready controller is not reported as recovered until replacement pods also
+pass the existing identity and readiness checks. Failed measurements and timeouts
+are reported as such, not as successful recovery.
+
+Activity is bounded to 64 KiB plus a truncation notice. If diagnostics cannot be
+written, recovery measurement continues. No extra cluster requests are made for
+activity, and all deletion, dry-run, confirmation, and namespace safeguards stay
+unchanged. Stdout remains the same JSON report with no schema change.
+
 ## Inputs
 
 | Input     | Default | Purpose                                           |
@@ -50,6 +64,8 @@ the wrong pods.
 refuses a setting that could delete every desired replica.
 
 ## Dependencies
+
+Requires Sofka 0.27.2 or newer for live plugin activity.
 
 `kubectl` on `PATH`. It runs with your credentials and against the context
 sofka is showing.

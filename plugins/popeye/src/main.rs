@@ -4,6 +4,8 @@
 //! The JSON is parsed straight from the child's pipe under a shared line budget,
 //! so a scan of a large cluster never has to be held in memory in full.
 
+mod activity;
+
 use std::collections::BTreeMap;
 use std::ffi::OsStr;
 use std::fmt::Write as _;
@@ -178,9 +180,13 @@ fn scan(context: &str, namespace: &str) -> Result<Envelope, String> {
         .stderr
         .take()
         .ok_or_else(|| "failed to capture Popeye stderr".to_string())?;
-    // Drain stderr on its own thread: a chatty scan that fills the pipe would
-    // otherwise block Popeye while this process waits on stdout.
-    let errors = std::thread::spawn(move || bounded_read(stderr, STDERR_MAX_BYTES));
+    let _ = writeln!(
+        std::io::stderr(),
+        "Popeye Kubernetes scan started; waiting for scanner results"
+    );
+    // Drain stderr independently while stdout remains the final JSON report.
+    let errors =
+        std::thread::spawn(move || activity::relay(stderr, std::io::stderr(), STDERR_MAX_BYTES));
     let mut stdout = CapturingReader::new(stdout, STDERR_MAX_BYTES);
     let parsed = parse(&mut stdout);
     if parsed.is_err() {
@@ -194,9 +200,15 @@ fn scan(context: &str, namespace: &str) -> Result<Envelope, String> {
     let status = child
         .wait()
         .map_err(|e| format!("failed while waiting for Popeye: {e}"))?;
-    let stderr = errors.join().unwrap_or_default();
+    let stderr = errors
+        .join()
+        .map_err(|_| "Popeye diagnostic reader panicked".to_string())?
+        .map_err(|e| format!("cannot read Popeye diagnostics: {e}"))?;
     match parsed {
-        Ok(envelope) if status.success() => Ok(envelope),
+        Ok(envelope) if status.success() => {
+            let _ = writeln!(std::io::stderr(), "Popeye scan finished; preparing report");
+            Ok(envelope)
+        }
         Ok(_) => Err(scan_error(None, &status.to_string(), &stdout, &stderr)),
         Err(error) => Err(scan_error(
             Some(error),
