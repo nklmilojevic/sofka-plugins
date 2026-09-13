@@ -261,6 +261,13 @@ def check_version_ranges() -> None:
         if catalog.requires_supported_sofka(value):
             FAILURES.append(f"accepted the pre-0.26 sofka range {value!r}")
 
+    for value in [">=0.27.1", "=0.27.1", "^0.27.1", "~0.27.1", ">0.27.0", ">0.27", ">=0.28", "1.*", ">=1", ">=0.27.1, <1", ">=0.27.1-alpha, >=0.27.1"]:
+        if not catalog.requires_supported_sofka(value, (0, 27, 1, True)):
+            FAILURES.append(f"rejected the package-title range {value!r}")
+    for value in ["*", ">=0.27.0", "=0.26.0", "^0.27", "0.27.*", "~0.27.0", "<1", "<=0.27.1", ">0.26", ">=0.27.1-alpha", ">0.27.0, <0.27.1-beta", "latest"]:
+        if catalog.requires_supported_sofka(value, (0, 27, 1, True)):
+            FAILURES.append(f"accepted the incompatible package-title range {value!r}")
+
     for value in ["0.1.0", "1.2.3-alpha.1+build.01", f"{2**64 - 1}.0.0"]:
         if not catalog.valid_version(value):
             FAILURES.append(f"rejected the valid version {value!r}")

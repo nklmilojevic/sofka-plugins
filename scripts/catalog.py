@@ -349,18 +349,29 @@ def requires_supported_sofka(value: object, minimum: tuple[int, int, int, bool] 
     if value.lstrip(" ").rstrip(" ") in {"*", "x", "X"}:
         return False
     lower_bounds: list[tuple[int, int, int, bool]] = []
-    for part in value.lstrip(" ").split(","):
-        match = COMPARATOR.fullmatch(part.lstrip(" "))
+    comparators = [COMPARATOR.fullmatch(part.lstrip(" ")) for part in value.lstrip(" ").split(",")]
+    for match in comparators:
         if match is None or match["op"] in {"<", "<="}:
             continue
         minor = match["minor"]
         patch = match["patch"]
-        lower_bounds.append((
+        numbers = [
             int(match["major"]),
             int(minor) if minor is not None and minor not in {"*", "x", "X"} else 0,
             int(patch) if patch is not None and patch not in {"*", "x", "X"} else 0,
-            match["pre"] is None,
-        ))
+        ]
+        stable = match["pre"] is None
+        if match["op"] == ">" and stable and (*numbers, stable) < minimum:
+            component = 2 if patch is not None and patch not in {"*", "x", "X"} else 1 if minor is not None and minor not in {"*", "x", "X"} else 0
+            if numbers[component] == U64_MAX:
+                continue
+            numbers[component] += 1
+            stable = not any(
+                other is not None and other["pre"] is not None
+                and [other["major"], other["minor"], other["patch"]] == list(map(str, numbers))
+                for other in comparators
+            )
+        lower_bounds.append((*numbers, stable))
     return bool(lower_bounds) and max(lower_bounds) >= minimum
 
 
