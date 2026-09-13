@@ -1,13 +1,13 @@
-schema_version = 1
+schema_version = 2
 
 [package]
-version = "0.1.0"
+version = "0.1.1"
 authors = ["vyrti"]
 license = "MIT OR Apache-2.0"
 description = "Benchmark the selected pod or service over a managed port-forward with oha."
 repository = "https://github.com/nklmilojevic/sofka-plugins"
 readme = "README.md"
-sofka = ">=0.26.0"
+sofka = ">=0.27.0"
 platforms = [
   "x86_64-unknown-linux-gnu",
   "aarch64-unknown-linux-gnu",
@@ -16,7 +16,7 @@ platforms = [
 ]
 tags = ["benchmark", "http", "load", "report"]
 
-[plugin]
+[[commands]]
 name = "HTTP benchmark"
 palette = "oha"
 command = "./adapter"
@@ -34,29 +34,29 @@ mutating = false
 network_load = true
 timeout = "6m"
 
-[plugin.inputs.port]
+[commands.inputs.port]
 type = "integer"
 default = "80"
 min = 1
 max = 65535
 
-[plugin.inputs.duration]
+[commands.inputs.duration]
 type = "duration"
 default = "10s"
 max = 300
 
-[plugin.inputs.connections]
+[commands.inputs.connections]
 type = "integer"
 default = "20"
 min = 1
 max = 1000
 
-[plugin.inputs.rate]
+[commands.inputs.rate]
 type = "integer"
 default = "100"
 min = 1
 max = 10000
 
-[plugin.inputs.path]
+[commands.inputs.path]
 type = "string"
 default = "/"

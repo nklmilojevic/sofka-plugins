@@ -1,13 +1,13 @@
-schema_version = 1
+schema_version = 2
 
 [package]
-version = "0.1.0"
+version = "0.1.1"
 authors = ["vyrti"]
 license = "MIT OR Apache-2.0"
 description = "Scan the active context with Popeye and report findings by linter."
 repository = "https://github.com/nklmilojevic/sofka-plugins"
 readme = "README.md"
-sofka = ">=0.26.0"
+sofka = ">=0.27.0"
 platforms = [
   "x86_64-unknown-linux-gnu",
   "aarch64-unknown-linux-gnu",
@@ -16,7 +16,7 @@ platforms = [
 ]
 tags = ["diagnostics", "report", "audit"]
 
-[plugin]
+[[commands]]
 name = "Popeye scan"
 palette = "popeye"
 command = "./adapter"
@@ -28,6 +28,6 @@ target = "context"
 mutating = false
 timeout = "5m"
 
-[plugin.inputs.report]
+[commands.inputs.report]
 type = "string"
 default = ""

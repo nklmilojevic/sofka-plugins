@@ -15,6 +15,10 @@ GitHub Release assets and are never committed to Git.
 | [`trivy`](plugins/trivy)                       | [Trivy](https://trivy.dev) on `PATH`                   |
 | [`resource-summary`](plugins/resource-summary) | nothing                                                |
 
+Packages use manifest schema `2` and require Sofka `>=0.27.0`. Each package can
+contain several `[[commands]]` entries with separate inputs, scopes, and safety
+settings. Publish these versions after Sofka adds schema 2 support.
+
 The complete scope, design, and acceptance criteria are in
 [sofka issue #502](https://github.com/nklmilojevic/sofka/issues/502).
 The agreed proposal is in

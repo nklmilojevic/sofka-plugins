@@ -6,11 +6,18 @@
   "additionalProperties": false,
   "required": ["schema_version", "generated_at", "plugins"],
   "properties": {
-    "schema_version": { "const": 1 },
-    "generated_at": { "type": "string", "format": "date-time" },
+    "schema_version": {
+      "enum": [1, 2]
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "plugins": {
       "type": "array",
-      "items": { "$ref": "#/$defs/plugin" }
+      "items": {
+        "$ref": "#/$defs/plugin"
+      }
     }
   },
   "$defs": {
@@ -27,16 +34,100 @@
         "versions"
       ],
       "properties": {
-        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
-        "display_name": { "type": "string", "minLength": 1 },
-        "description": { "type": "string", "minLength": 1 },
-        "tags": { "type": "array", "items": { "type": "string" } },
-        "publisher": { "type": "string", "minLength": 1 },
-        "repository": { "type": "string", "format": "uri" },
-        "versions": { "type": "array", "items": { "$ref": "#/$defs/version" } }
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "publisher": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
+          "type": "string",
+          "format": "uri"
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/version"
+          }
+        }
       }
     },
     "version": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/legacyVersion"
+        },
+        {
+          "$ref": "#/$defs/commandVersion"
+        }
+      ]
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "install"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "install": {
+          "type": "string"
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "url", "blake3", "size"],
+      "properties": {
+        "platform": {
+          "enum": [
+            "any",
+            "x86_64-unknown-linux-gnu",
+            "aarch64-unknown-linux-gnu",
+            "x86_64-apple-darwin",
+            "aarch64-apple-darwin"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "blake3": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 52428800
+        }
+      }
+    },
+    "legacyVersion": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -57,52 +148,216 @@
         "artifacts"
       ],
       "properties": {
-        "version": { "type": "string" },
-        "sofka": { "type": "string" },
-        "source_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
-        "license": { "type": "string" },
-        "readme": { "type": "string", "format": "uri" },
-        "requirements": { "type": "array", "items": { "$ref": "#/$defs/requirement" } },
-        "command": { "type": "string" },
-        "target": { "enum": ["selection", "context"] },
-        "output": { "enum": ["popup", "background", "report"] },
-        "mutating": { "type": "boolean" },
-        "confirm": { "type": "boolean" },
-        "dangerous": { "type": "boolean" },
-        "network_load": { "type": "boolean" },
-        "status": { "enum": ["active", "withdrawn"] },
-        "withdrawal_reason": { "type": "string", "minLength": 1 },
-        "artifacts": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/artifact" } }
-      }
-    },
-    "requirement": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["name", "install"],
-      "properties": {
-        "name": { "type": "string" },
-        "alternatives": { "type": "array", "items": { "type": "string", "minLength": 1 } },
-        "install": { "type": "string" }
-      }
-    },
-    "artifact": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["platform", "url", "blake3", "size"],
-      "properties": {
-        "platform": {
-          "enum": [
-            "any",
-            "x86_64-unknown-linux-gnu",
-            "aarch64-unknown-linux-gnu",
-            "x86_64-apple-darwin",
-            "aarch64-apple-darwin"
-          ]
+        "version": {
+          "type": "string"
         },
-        "url": { "type": "string", "format": "uri" },
-        "blake3": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "size": { "type": "integer", "minimum": 1, "maximum": 52428800 }
+        "sofka": {
+          "type": "string"
+        },
+        "source_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "license": {
+          "type": "string"
+        },
+        "readme": {
+          "type": "string",
+          "format": "uri"
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/requirement"
+          }
+        },
+        "command": {
+          "type": "string"
+        },
+        "target": {
+          "enum": ["selection", "context"]
+        },
+        "output": {
+          "enum": ["popup", "background", "report"]
+        },
+        "mutating": {
+          "type": "boolean"
+        },
+        "confirm": {
+          "type": "boolean"
+        },
+        "dangerous": {
+          "type": "boolean"
+        },
+        "network_load": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": ["active", "withdrawn"]
+        },
+        "withdrawal_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/artifact"
+          }
+        }
+      }
+    },
+    "commandVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "sofka",
+        "source_commit",
+        "license",
+        "readme",
+        "requirements",
+        "status",
+        "artifacts",
+        "commands"
+      ],
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "sofka": {
+          "type": "string"
+        },
+        "source_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "license": {
+          "type": "string"
+        },
+        "readme": {
+          "type": "string",
+          "format": "uri"
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/requirement"
+          }
+        },
+        "status": {
+          "enum": ["active", "withdrawn"]
+        },
+        "withdrawal_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/artifact"
+          }
+        },
+        "commands": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/command"
+          }
+        }
+      }
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "command",
+        "args",
+        "scopes",
+        "target",
+        "output",
+        "mutating",
+        "confirm",
+        "dangerous",
+        "network_load"
+      ],
+      "properties": {
+        "confirm": {
+          "type": "boolean"
+        },
+        "network_load": {
+          "type": "boolean"
+        },
+        "mutating": {
+          "type": "boolean"
+        },
+        "command": {
+          "type": "string"
+        },
+        "output": {
+          "enum": ["popup", "background", "report"]
+        },
+        "dangerous": {
+          "type": "boolean"
+        },
+        "target": {
+          "enum": ["selection", "context"]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "palette": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     }
-  }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "plugins": {
+          "items": {
+            "properties": {
+              "versions": {
+                "items": {
+                  "$ref": "#/$defs/legacyVersion"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "schema_version": {
+          "const": 2
+        }
+      }
+    }
+  ]
 }

@@ -10,6 +10,24 @@ metadata: its `[package]` table names the version, authors, licence,
 repository, supported sofka versions, and platforms, and publication generates
 the catalog entry from it. The package ID is its directory name, and the
 packaged adapter is always `adapter`, so `command` is `./adapter`.
+
+Use manifest schema `2` and one or more `[[commands]]` entries. Each command has
+its own full `palette` name, resource scopes, inputs, and safety flags. Keep input
+tables under the command that uses them, with `[commands.inputs.NAME]`. Do not
+add a `[plugin]` table. Command names, palette names, and nonempty key chords
+must be unique within a package. All commands use `./adapter`; use `args` to
+select the action when an adapter provides several actions.
+
+Command packages require Sofka `>=0.27.0`. Publish them only after the Sofka
+release that includes manifest schema 2 support. Installation, update, and
+removal apply to the whole package. The adapter request and report protocols
+still use schema version `1`.
+
+Publication writes catalog schema `2`, with execution settings in each release's
+`commands` array. Existing release records keep their original fields and bytes.
+Older Sofka clients cannot read catalog schema 2. The new client reads both
+catalog versions and both manifest versions.
+
 Every package is published under this repository's `MIT OR Apache-2.0`; both
 licence files ship inside every archive, so a package carries no licence file of
 its own and `[package].license` must declare exactly that licence.
