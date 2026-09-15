@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --locked python
 """Validate, package, and publish the single-file sofka plugin catalog."""
 
 from __future__ import annotations
@@ -47,6 +47,8 @@ TARGETS = {
     "aarch64-unknown-linux-gnu": "ubuntu-22.04-arm",
     "aarch64-apple-darwin": "macos-latest",
     "x86_64-apple-darwin": "macos-15-intel",
+    "x86_64-pc-windows-msvc": "windows-2025",
+    "aarch64-pc-windows-msvc": "windows-11-arm",
 }
 TARGET_MODES = {"selection", "context"}
 OUTPUT_MODES = {"popup", "background", "report"}
@@ -755,7 +757,7 @@ def package(args: argparse.Namespace) -> None:
         (PLUGINS / plugin / "README.md", "README.md", 0o644),
         (ROOT / "LICENSE-MIT", "LICENSE-MIT", 0o644),
         (ROOT / "LICENSE-APACHE", "LICENSE-APACHE", 0o644),
-        (binary, ADAPTER, 0o755),
+        (binary, ADAPTER + (".exe" if args.target.endswith("-windows-msvc") else ""), 0o755),
     ]
     with output.open("wb") as raw:
         # Level 19 at a pinned zstandard: ~20% smaller than gzip on a package

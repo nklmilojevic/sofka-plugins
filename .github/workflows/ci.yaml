@@ -3,6 +3,10 @@ name: CI
 on:
   pull_request:
 
+defaults:
+  run:
+    shell: bash
+
 permissions:
   contents: read
 
@@ -17,17 +21,16 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
+          version: "0.12.11"
           python-version: "3.12"
-      - name: Install the BLAKE3 wheel
-        run: pip install --no-deps -r scripts/requirements.txt
       - id: changes
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.sha }}
         run: |
-          changes="$(python3 scripts/catalog.py changes --base "$BASE" --head "$HEAD" --mode test)"
+          changes="$(uv run --locked python scripts/catalog.py changes --base "$BASE" --head "$HEAD" --mode test)"
           echo "plugins=$(jq -c .plugins <<<"$changes")" >> "$GITHUB_OUTPUT"
           echo "matrix=$(jq -c .matrix <<<"$changes")" >> "$GITHUB_OUTPUT"
 
@@ -39,20 +42,19 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
+          version: "0.12.11"
           python-version: "3.12"
-      - name: Install the BLAKE3 wheel
-        run: pip install --no-deps -r scripts/requirements.txt
       - name: Validate catalog and sources
-        run: python3 scripts/catalog.py validate
+        run: uv run --locked python scripts/catalog.py validate
       - name: Test catalog validation
-        run: python3 scripts/test_catalog.py
+        run: uv run --locked python scripts/test_catalog.py
       - name: Reject replacement or modification of a published version
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.sha }}
-        run: python3 scripts/catalog.py assert-unpublished --base "$BASE" --head "$HEAD"
+        run: uv run --locked python scripts/catalog.py assert-unpublished --base "$BASE" --head "$HEAD"
       # No workspace member lives outside plugins/, so a change that selects no
       # plugin has no Rust to compile.
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
@@ -72,7 +74,7 @@ jobs:
         if: needs.changes.outputs.plugins != '[]'
         run: |
           cargo build --locked --workspace
-          python3 scripts/test_activity.py
+          uv run --locked python scripts/test_activity.py
 
   build:
     needs: [changes, validate]
@@ -85,34 +87,18 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
+          version: "0.12.11"
           python-version: "3.12"
-      - name: Install the BLAKE3 wheel
-        run: pip install --no-deps -r scripts/requirements.txt
       - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
         with:
           targets: ${{ matrix.target }}
-      - name: Build adapter
-        run: cargo build --release --locked --package "sofka-plugin-${{ matrix.plugin }}" --target "${{ matrix.target }}"
-      - name: Test adapter fixture
+      - name: Build, test, and package adapter
         env:
           PLUGIN: ${{ matrix.plugin }}
           TARGET: ${{ matrix.target }}
-        run: |
-          "target/$TARGET/release/sofka-plugin-$PLUGIN" < "plugins/$PLUGIN/fixtures/request.json" > report.json
-          python3 -c 'import json,sys; assert json.load(open(sys.argv[1])) == json.load(open(sys.argv[2]))' report.json "plugins/$PLUGIN/fixtures/report.json"
-      - name: Build deterministic package
-        env:
-          PLUGIN: ${{ matrix.plugin }}
-          TARGET: ${{ matrix.target }}
-        run: |
-          version="$(python3 scripts/catalog.py version --plugin "$PLUGIN")"
-          python3 scripts/catalog.py package \
-            --plugin "$PLUGIN" \
-            --target "$TARGET" \
-            --binary "target/$TARGET/release/sofka-plugin-$PLUGIN" \
-            --output "$PLUGIN-$version-$TARGET.tar.zst"
+        run: uv run --locked python scripts/build_adapter.py --plugin "$PLUGIN" --target "$TARGET"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ matrix.plugin }}-${{ matrix.target }}

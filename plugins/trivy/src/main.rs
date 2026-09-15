@@ -101,7 +101,7 @@ fn detect() -> Option<PathBuf> {
 fn detect_in_path(path: &OsStr, own: Option<&Path>) -> Option<PathBuf> {
     let own = own.and_then(|path| path.canonicalize().ok());
     std::env::split_paths(path)
-        .map(|dir| dir.join(EXECUTABLE))
+        .map(|dir| dir.join(format!("{EXECUTABLE}{}", std::env::consts::EXE_SUFFIX)))
         .find(|candidate| is_executable(candidate) && candidate.canonicalize().ok() != own)
         .map(absolute)
 }
@@ -1551,12 +1551,12 @@ mod tests {
                 std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o755)).unwrap();
             }
         };
-        let own = package.join("trivy");
+        let own = package.join(format!("trivy{}", std::env::consts::EXE_SUFFIX));
         write(&own);
         let path = std::env::join_paths([&package, &system]).unwrap();
         assert_eq!(detect_in_path(&path, Some(&own)), None);
         assert_eq!(detect_in_path(&path, None), Some(own.clone()));
-        let system_trivy = system.join("trivy");
+        let system_trivy = system.join(format!("trivy{}", std::env::consts::EXE_SUFFIX));
         write(&system_trivy);
         assert_eq!(detect_in_path(&path, Some(&own)), Some(system_trivy));
         let _ = std::fs::remove_dir_all(dir);

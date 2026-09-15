@@ -172,7 +172,7 @@ fn detect() -> Option<PathBuf> {
 fn detect_in_path(path: &OsStr, own: Option<&Path>) -> Option<PathBuf> {
     let own = own.and_then(|path| path.canonicalize().ok());
     std::env::split_paths(path)
-        .map(|dir| dir.join(EXECUTABLE))
+        .map(|dir| dir.join(format!("{EXECUTABLE}{}", std::env::consts::EXE_SUFFIX)))
         .find(|candidate| is_executable(candidate) && candidate.canonicalize().ok() != own)
         .map(|path| {
             if path.is_absolute() {
@@ -747,7 +747,7 @@ mod tests {
         let package = dir.join("package");
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&package).unwrap();
-        let own = package.join("oha");
+        let own = package.join(format!("oha{}", std::env::consts::EXE_SUFFIX));
         std::fs::write(&own, "#!/bin/sh\nexit 0\n").unwrap();
         #[cfg(unix)]
         {

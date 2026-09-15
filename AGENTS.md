@@ -43,7 +43,8 @@ owns runtime behavior; this repository owns package source and catalog publicati
 5. Use one package for related commands. Each command has its own full `palette`
    name, scopes, inputs, timeout, and safety flags. Names, palette names, and
    nonempty key chords must be unique within the package.
-6. Set each executable to `./adapter`. For several actions, select the action with
+6. Set each executable to `./adapter`. Windows packages contain `adapter.exe`;
+   Sofka resolves the suffix. For several actions, select the action with
    `args` and handle it in the adapter. Place `[commands.inputs.NAME]` tables below
    the command that uses them. Do not use `[plugin]` or `[[plugins]]` in a package.
 7. Declare external tools in `requires`, with installation instructions in
@@ -108,9 +109,8 @@ with the PR base and head refs. CI in `.github/workflows/ci.yaml` is the authori
 for required checks. Repeat checks after relevant changes or failures; reuse
 results for code that has not changed.
 
-Python dependencies belong in `pyproject.toml`. Regenerate `uv.lock` with uv and
-export `scripts/requirements.txt` with the command in the README. CI still uses
-that generated requirements file. For development-environment changes, check
+Python dependencies belong in `pyproject.toml`. Regenerate `uv.lock` with uv.
+Use `uv run --locked` for Python commands in development, CI, and publication. For development-environment changes, check
 the flake with `nix flake check --no-build` and run the affected checks inside
 `nix develop`. Do not commit `.venv`, `.direnv`, or Nix result links.
 
