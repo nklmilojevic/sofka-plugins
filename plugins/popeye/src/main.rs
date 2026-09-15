@@ -103,7 +103,7 @@ fn detect_in_path(path: &OsStr, own: Option<&Path>) -> Option<PathBuf> {
     let own = own.and_then(|path| path.canonicalize().ok());
     for dir in std::env::split_paths(path) {
         for name in EXECUTABLES {
-            let candidate = dir.join(name);
+            let candidate = dir.join(format!("{name}{}", std::env::consts::EXE_SUFFIX));
             if !is_executable(&candidate) {
                 continue;
             }
@@ -1065,7 +1065,7 @@ mod tests {
                 std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o755)).unwrap();
             }
         };
-        let own = package.join("popeye");
+        let own = package.join(format!("popeye{}", std::env::consts::EXE_SUFFIX));
         write(&own);
         let path = std::env::join_paths([&package, &system]).unwrap();
 
@@ -1074,12 +1074,12 @@ mod tests {
         // Without the guard it would find itself.
         assert_eq!(detect_in_path(&path, None), Some(own.clone()));
 
-        let krew = system.join("kubectl-popeye");
+        let krew = system.join(format!("kubectl-popeye{}", std::env::consts::EXE_SUFFIX));
         write(&krew);
         assert_eq!(detect_in_path(&path, Some(&own)), Some(krew.clone()));
 
         // A standalone Popeye earlier on PATH wins over the Krew spelling.
-        let standalone = system.join("popeye");
+        let standalone = system.join(format!("popeye{}", std::env::consts::EXE_SUFFIX));
         write(&standalone);
         assert_eq!(detect_in_path(&path, Some(&own)), Some(standalone));
 

@@ -2,18 +2,20 @@ schema_version = 2
 
 [package]
 display_name = "cert-manager"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["zoispag"]
 license = "MIT OR Apache-2.0"
 description = "Show the status of a cert-manager Certificate, inspect the certificate in a TLS Secret, and request a renewal with cmctl."
 repository = "https://github.com/nklmilojevic/sofka-plugins"
 readme = "README.md"
-sofka = ">=0.27.2"
+sofka = ">=0.27.4"
 platforms = [
   "x86_64-unknown-linux-gnu",
   "aarch64-unknown-linux-gnu",
   "x86_64-apple-darwin",
   "aarch64-apple-darwin",
+  "x86_64-pc-windows-msvc",
+  "aarch64-pc-windows-msvc",
 ]
 tags = ["cert-manager", "tls", "certificates", "secrets", "x509", "renew", "report"]
 

@@ -7,14 +7,14 @@ Sofka reads the complete catalog from [`index.json`](index.json) once per
 command. Package source remains under `plugins/<id>/`; compiled archives are
 GitHub Release assets and are never committed to Git.
 
-| Package                                        | Needs                                                  |
-| ---------------------------------------------- | ------------------------------------------------------ |
+| Package                                        | Needs                                                                                                   |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | [`cert-manager`](plugins/cert-manager)         | [cmctl](https://cert-manager.io/docs/reference/cmctl/) and `kubectl` on `PATH`; **renews certificates** |
-| [`chaos-kill`](plugins/chaos-kill)             | `kubectl` on `PATH` — **deletes pods**                 |
-| [`oha`](plugins/oha)                           | [oha](https://github.com/hatoo/oha) on `PATH`          |
-| [`popeye`](plugins/popeye)                     | [Popeye](https://github.com/derailed/popeye) on `PATH` |
-| [`trivy`](plugins/trivy)                       | [Trivy](https://trivy.dev) on `PATH`                   |
-| [`resource-summary`](plugins/resource-summary) | nothing                                                |
+| [`chaos-kill`](plugins/chaos-kill)             | `kubectl` on `PATH` — **deletes pods**                                                                  |
+| [`oha`](plugins/oha)                           | [oha](https://github.com/hatoo/oha) on `PATH`                                                           |
+| [`popeye`](plugins/popeye)                     | [Popeye](https://github.com/derailed/popeye) on `PATH`                                                  |
+| [`trivy`](plugins/trivy)                       | [Trivy](https://trivy.dev) on `PATH`                                                                    |
+| [`resource-summary`](plugins/resource-summary) | nothing                                                                                                 |
 
 Packages use manifest schema `2` and require Sofka `>=0.27.1`. Each package can
 contain several `[[commands]]` entries with separate inputs, scopes, and safety
@@ -51,19 +51,50 @@ and can cache the Nix environment. Dependency-file changes reload the environmen
 Without Nix, install a Rust toolchain with Clippy and rustfmt, then use
 `uv sync --locked`. uv selects Python 3.12 from `.python-version`.
 
-Declare Python dependencies in `pyproject.toml` and commit `uv.lock`. After a
-dependency change, regenerate the requirements file used by CI:
+Declare Python dependencies in `pyproject.toml` and commit `uv.lock`.
+After a dependency change, update the lock and local environment:
 
 ```sh
 uv lock
-uv export --locked --no-dev --no-hashes --no-annotate --no-emit-project --output-file scripts/requirements.txt
+uv sync --locked
 ```
 
-Do not edit the generated requirements file by hand. `.venv`, `.direnv`, and
+CI and publication also run Python through `uv run --locked`. `.venv`, `.direnv`, and
 Nix result links are ignored by Git. See [AGENTS.md](AGENTS.md) for the plugin
 workflow and required checks.
 
 ## Publishing a package
+
+### Windows support
+
+The Windows targets follow the published upstream tool binaries, checked on
+2026-09-15:
+
+| Adapter          | Required tool                                                                                                                                               | Windows x86_64 | Windows ARM64            |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------ |
+| Resource summary | None                                                                                                                                                        | Yes            | Yes                      |
+| cert-manager     | [cmctl 2.5.0](https://github.com/cert-manager/cmctl/releases/tag/v2.5.0), [kubectl 1.37.0](https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/) | Yes            | Yes                      |
+| Chaos kill       | kubectl 1.37.0                                                                                                                                              | Yes            | Yes                      |
+| Popeye           | [Popeye 0.22.1](https://github.com/derailed/popeye/releases/tag/v0.22.1)                                                                                    | Yes            | Yes                      |
+| Trivy            | [Trivy 0.74.0](https://github.com/aquasecurity/trivy/releases/tag/v0.74.0)                                                                                  | Yes            | No upstream ARM64 binary |
+| HTTP benchmark   | [oha 1.16.0](https://github.com/hatoo/oha/releases/tag/v1.16.0)                                                                                             | Yes            | No upstream ARM64 binary |
+
+Install the Windows tools listed by each package and put their `.exe` files on
+`PATH`. ARM64 support is not declared for Trivy or oha based on x86_64 emulation.
+CI runs adapter unit tests and saved fixtures on native runners. It checks the
+packaged executable again after extraction. No live tool or cluster operation
+is part of these tests.
+
+Windows archives keep the `<plugin>-<version>-<target>.tar.zst` name and contain
+`adapter.exe` with the static Microsoft C runtime. The authored manifest keeps
+`command = "./adapter"`; Sofka resolves the suffix.
+
+These package versions require Sofka 0.27.4 or later. Release the required Sofka
+Windows plugin support before merging the package change: a merge that changes
+package sources starts publication. Published catalog entries and assets stay
+unchanged until new versions are published.
+
+### Publication steps
 
 1. Add or change one directory under `plugins/` and increment its semantic
    version in both `Cargo.toml` and the `[package]` table of `plugin.toml`.

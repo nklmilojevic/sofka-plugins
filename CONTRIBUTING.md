@@ -9,7 +9,8 @@ request/report fixtures, and tests. `plugin.toml` is the only authored
 metadata: its `[package]` table names the version, authors, licence,
 repository, supported sofka versions, and platforms, and publication generates
 the catalog entry from it. The package ID is its directory name, and the
-packaged adapter is always `adapter`, so `command` is `./adapter`.
+packaged adapter is `adapter` on Linux and macOS, and `adapter.exe` on Windows.
+Keep the authored `command` as `./adapter`; Sofka resolves the Windows suffix.
 
 Use manifest schema `2` and one or more `[[commands]]` entries. Each command has
 its own full `palette` name, resource scopes, inputs, and safety flags. Keep input

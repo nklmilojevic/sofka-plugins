@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --locked python
 """Exercise built adapters with mock tools and a broken activity destination.
 
-Run `cargo build --locked --workspace` then `python3 scripts/test_activity.py`.
+Run `cargo build --locked --workspace` then `uv run --locked python scripts/test_activity.py`.
 No cluster, certificate renewal, or HTTP load is used.
 """
 

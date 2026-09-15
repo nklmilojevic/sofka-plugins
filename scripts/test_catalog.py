@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-"""Checks for catalog.py. Run with `python3 scripts/test_catalog.py`."""
+#!/usr/bin/env -S uv run --locked python
+"""Checks for catalog.py. Run with `uv run --locked python scripts/test_catalog.py`."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ import io
 import zstandard
 import json
 import pathlib
+import re
 import subprocess
 import sys
 import tarfile
@@ -194,8 +195,8 @@ confirm = true
             rejects("multiple commands without a package title", lambda: publish(untitled + second))
             for invalid in ['""', '"   "', 'false']:
                 rejects("an invalid package title", lambda invalid=invalid: publish(source.replace('display_name = "Certificate tools"', f'display_name = {invalid}')))
-            rejects("package title on an older Sofka client", lambda: publish(source.replace(">=0.27.1", ">=0.27.0")))
-            accepts("an untitled package for Sofka 0.27.0", lambda: publish(untitled.replace(">=0.27.1", ">=0.27.0")))
+            rejects("package title on an older Sofka client", lambda: publish(re.sub(r'sofka = "[^"]+"', 'sofka = ">=0.27.0"', source)))
+            accepts("an untitled package for Sofka 0.27.0", lambda: publish(re.sub(r'sofka = "[^"]+"', 'sofka = ">=0.27.0"', untitled)))
         finally:
             catalog.PLUGINS = original
     value = command_index()
@@ -527,6 +528,18 @@ def check_packaging() -> None:
             built.append(target.read_bytes())
         if built[0] != built[1]:
             FAILURES.append("packaging is not reproducible")
+
+        for platform in ("x86_64-pc-windows-msvc", "aarch64-pc-windows-msvc"):
+            target = out / f"{platform}.tar.zst"
+            catalog.package(argparse.Namespace(plugin="resource-summary", target=platform, binary=str(binary), output=str(target)))
+            data = zstandard.ZstdDecompressor().decompress(target.read_bytes(), max_output_size=64 << 20)
+            with tarfile.open(fileobj=io.BytesIO(data)) as archive:
+                if "adapter.exe" not in archive.getnames() or "adapter" in archive.getnames():
+                    FAILURES.append(f"{platform}: incorrect executable filename")
+                if archive.extractfile("adapter.exe").read() != binary.read_bytes():
+                    FAILURES.append(f"{platform}: changed binary bytes")
+                if archive.extractfile("plugin.toml").read() != MANIFEST.read_bytes():
+                    FAILURES.append(f"{platform}: changed source manifest")
 
         with tarfile.open(fileobj=io.BytesIO(zstandard.ZstdDecompressor().decompress(built[0], max_output_size=64 << 20))) as archive:
             members = {member.name: member for member in archive.getmembers()}
