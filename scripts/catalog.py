@@ -661,7 +661,7 @@ def changed_plugins(base: str, head: str, mode: str) -> list[str]:
         if len(parts := pathlib.PurePosixPath(name).parts) >= 2 and parts[0] == "plugins"
     }
     if mode == "test" and any(
-        name in {"Cargo.toml", "Cargo.lock"}
+        name in {"Cargo.toml", "Cargo.lock", ".gitattributes", "pyproject.toml", "uv.lock", ".python-version"}
         or name.startswith(("scripts/", ".github/workflows/"))
         or (name.endswith(".rs") and not name.startswith("plugins/"))
         for name in paths
