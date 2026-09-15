@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-13T19:32:42Z",
+  "generated_at": "2026-09-15T17:37:20Z",
   "plugins": [
     {
       "id": "cert-manager",
@@ -211,6 +211,115 @@
               "size": 327591
             }
           ]
+        },
+        {
+          "version": "0.1.2",
+          "sofka": ">=0.27.4",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/d8d82c2a81884a7abc5db4ec071352e71ee0d619/plugins/cert-manager/README.md",
+          "requirements": [
+            {
+              "name": "cmctl",
+              "install": "Install cmctl from https://cert-manager.io/docs/reference/cmctl/#installation"
+            },
+            {
+              "name": "kubectl",
+              "install": "Install kubectl from https://kubernetes.io/docs/tasks/tools/"
+            }
+          ],
+          "commands": [
+            {
+              "name": "Certificate status",
+              "command": "./adapter",
+              "args": [
+                "status"
+              ],
+              "scopes": [
+                "certificates"
+              ],
+              "target": "selection",
+              "output": "report",
+              "mutating": false,
+              "confirm": false,
+              "dangerous": false,
+              "network_load": false,
+              "palette": "cert-manager-status"
+            },
+            {
+              "name": "Inspect TLS secret",
+              "command": "./adapter",
+              "args": [
+                "inspect"
+              ],
+              "scopes": [
+                "secrets"
+              ],
+              "target": "selection",
+              "output": "report",
+              "mutating": false,
+              "confirm": false,
+              "dangerous": false,
+              "network_load": false,
+              "palette": "cert-manager-inspect"
+            },
+            {
+              "name": "Renew certificate",
+              "command": "./adapter",
+              "args": [
+                "renew"
+              ],
+              "scopes": [
+                "certificates"
+              ],
+              "target": "selection",
+              "output": "report",
+              "mutating": true,
+              "confirm": true,
+              "dangerous": false,
+              "network_load": false,
+              "palette": "cert-manager-renew"
+            }
+          ],
+          "source_commit": "d8d82c2a81884a7abc5db4ec071352e71ee0d619",
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "x86_64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/cert-manager-v0.1.2/cert-manager-0.1.2-x86_64-unknown-linux-gnu.tar.zst",
+              "blake3": "68f431009cd150a02949dd577d964ec4868b6ad620eb9f6402618538413ad244",
+              "size": 383337
+            },
+            {
+              "platform": "aarch64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/cert-manager-v0.1.2/cert-manager-0.1.2-aarch64-unknown-linux-gnu.tar.zst",
+              "blake3": "500019887b3ba14a6f098e7ceda3424c1b79e535da4697b28ae924687e4a08a5",
+              "size": 348904
+            },
+            {
+              "platform": "x86_64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/cert-manager-v0.1.2/cert-manager-0.1.2-x86_64-apple-darwin.tar.zst",
+              "blake3": "d59f6d88fc23e984fc01b7d3cf7b2d4f2c90afccda70f7ba5a5141c87f555ca6",
+              "size": 369203
+            },
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/cert-manager-v0.1.2/cert-manager-0.1.2-aarch64-apple-darwin.tar.zst",
+              "blake3": "d31ca1253be425414a246dacc22da0a8a30e92c8fba2ee7de5ebcec55aa22c3b",
+              "size": 327583
+            },
+            {
+              "platform": "x86_64-pc-windows-msvc",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/cert-manager-v0.1.2/cert-manager-0.1.2-x86_64-pc-windows-msvc.tar.zst",
+              "blake3": "ef71adab2b4249f3e6cdb291666e27284534a051d67eda91baab7b4cb99a4825",
+              "size": 349626
+            },
+            {
+              "platform": "aarch64-pc-windows-msvc",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/cert-manager-v0.1.2/cert-manager-0.1.2-aarch64-pc-windows-msvc.tar.zst",
+              "blake3": "729967dd43f3e1e287dbcc48ca665f69dd9e11aa3712454f38ca84459e1219f1",
+              "size": 312210
+            }
+          ]
         }
       ]
     },
@@ -391,6 +500,77 @@
               "size": 228882
             }
           ]
+        },
+        {
+          "version": "0.1.3",
+          "sofka": ">=0.27.4",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/d8d82c2a81884a7abc5db4ec071352e71ee0d619/plugins/chaos-kill/README.md",
+          "requirements": [
+            {
+              "name": "kubectl",
+              "install": "Install kubectl from https://kubernetes.io/docs/tasks/tools/"
+            }
+          ],
+          "commands": [
+            {
+              "name": "Chaos kill",
+              "command": "./adapter",
+              "args": [],
+              "scopes": [
+                "deployments",
+                "statefulsets",
+                "daemonsets"
+              ],
+              "target": "selection",
+              "output": "report",
+              "mutating": true,
+              "confirm": true,
+              "dangerous": true,
+              "network_load": false,
+              "palette": "chaos-kill"
+            }
+          ],
+          "source_commit": "d8d82c2a81884a7abc5db4ec071352e71ee0d619",
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "x86_64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.3/chaos-kill-0.1.3-x86_64-unknown-linux-gnu.tar.zst",
+              "blake3": "09efaeca1a3bd22e18f6374648e9b6abb3d4661e2714666d2d24d42974502791",
+              "size": 260163
+            },
+            {
+              "platform": "aarch64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.3/chaos-kill-0.1.3-aarch64-unknown-linux-gnu.tar.zst",
+              "blake3": "35532d0d4cbbae53720297c9170faf4a2e8ca0319b6f40e190540d9d0b29f2e9",
+              "size": 239830
+            },
+            {
+              "platform": "x86_64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.3/chaos-kill-0.1.3-x86_64-apple-darwin.tar.zst",
+              "blake3": "87d32676ac536663990b1c872fbcd9e91051c9abfefddea72c32a9cf03258e74",
+              "size": 248997
+            },
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.3/chaos-kill-0.1.3-aarch64-apple-darwin.tar.zst",
+              "blake3": "17cf8897b525f83dc38e0deeb5b24c2ac2ed81a1d4a295a2dbbc4898abe072b4",
+              "size": 228893
+            },
+            {
+              "platform": "x86_64-pc-windows-msvc",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.3/chaos-kill-0.1.3-x86_64-pc-windows-msvc.tar.zst",
+              "blake3": "94b6172a6406fa8d3bb5f4b4be1ce28e05a4600d489fb5b74df39225f618f7a5",
+              "size": 237062
+            },
+            {
+              "platform": "aarch64-pc-windows-msvc",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.3/chaos-kill-0.1.3-aarch64-pc-windows-msvc.tar.zst",
+              "blake3": "c209a4114220ea9cccd42a4ab1699dc9245c7ca7d8a2a29c3b0b99f545d20015",
+              "size": 215271
+            }
+          ]
         }
       ]
     },
@@ -569,6 +749,70 @@
               "size": 248155
             }
           ]
+        },
+        {
+          "version": "0.1.3",
+          "sofka": ">=0.27.4",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/d8d82c2a81884a7abc5db4ec071352e71ee0d619/plugins/oha/README.md",
+          "requirements": [
+            {
+              "name": "oha",
+              "install": "Install oha from https://github.com/hatoo/oha#installation"
+            }
+          ],
+          "commands": [
+            {
+              "name": "HTTP benchmark",
+              "command": "./adapter",
+              "args": [],
+              "scopes": [
+                "pods",
+                "services"
+              ],
+              "target": "selection",
+              "output": "report",
+              "mutating": false,
+              "confirm": false,
+              "dangerous": false,
+              "network_load": true,
+              "palette": "oha"
+            }
+          ],
+          "source_commit": "d8d82c2a81884a7abc5db4ec071352e71ee0d619",
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "x86_64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.3/oha-0.1.3-x86_64-unknown-linux-gnu.tar.zst",
+              "blake3": "28a5c98903291f86491f27df067eef389a7a90b2cfd5b4c1c03e1d4dbc048b93",
+              "size": 284348
+            },
+            {
+              "platform": "aarch64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.3/oha-0.1.3-aarch64-unknown-linux-gnu.tar.zst",
+              "blake3": "37b8566d8ee4515879f7ab5b1a20ec66afb0ff138f4e7b92876010b71b271b1c",
+              "size": 262166
+            },
+            {
+              "platform": "x86_64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.3/oha-0.1.3-x86_64-apple-darwin.tar.zst",
+              "blake3": "691b661d0bdd6125a292ae6a12a7d6e9a7d364b33772bbb641ce0d01337e1363",
+              "size": 272275
+            },
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.3/oha-0.1.3-aarch64-apple-darwin.tar.zst",
+              "blake3": "ca5824c4c1d7f319d577e63e733a51d2683ec6657cd1339005e4be8ee965f35e",
+              "size": 248171
+            },
+            {
+              "platform": "x86_64-pc-windows-msvc",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.3/oha-0.1.3-x86_64-pc-windows-msvc.tar.zst",
+              "blake3": "8b62568891ef5fb541bb75719175b5f7956cd02eb2a0fc180f23c7d1e22e85bb",
+              "size": 256010
+            }
+          ]
         }
       ]
     },
@@ -740,6 +984,73 @@
               "size": 233697
             }
           ]
+        },
+        {
+          "version": "0.1.3",
+          "sofka": ">=0.27.4",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/d8d82c2a81884a7abc5db4ec071352e71ee0d619/plugins/popeye/README.md",
+          "requirements": [
+            {
+              "name": "popeye",
+              "install": "Install Popeye from https://github.com/derailed/popeye#installation"
+            }
+          ],
+          "commands": [
+            {
+              "name": "Popeye scan",
+              "command": "./adapter",
+              "args": [],
+              "scopes": [],
+              "target": "context",
+              "output": "report",
+              "mutating": false,
+              "confirm": false,
+              "dangerous": false,
+              "network_load": false,
+              "palette": "popeye"
+            }
+          ],
+          "source_commit": "d8d82c2a81884a7abc5db4ec071352e71ee0d619",
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "x86_64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/popeye-v0.1.3/popeye-0.1.3-x86_64-unknown-linux-gnu.tar.zst",
+              "blake3": "9ab562c3164459b105c489b7152d773c7aafad3c014970137c28a2a74429f7ec",
+              "size": 266581
+            },
+            {
+              "platform": "aarch64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/popeye-v0.1.3/popeye-0.1.3-aarch64-unknown-linux-gnu.tar.zst",
+              "blake3": "c9eaa83dffc15df8e8d5899c1687067cc16ec2239c9866c3fa905cd47e5ed88d",
+              "size": 245486
+            },
+            {
+              "platform": "x86_64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/popeye-v0.1.3/popeye-0.1.3-x86_64-apple-darwin.tar.zst",
+              "blake3": "6d4fda65791ed75e8aa345e0b20203ba8933f059de50e1be820a0d4e91269a10",
+              "size": 253830
+            },
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/popeye-v0.1.3/popeye-0.1.3-aarch64-apple-darwin.tar.zst",
+              "blake3": "635a258c02a0eb6201bdc5ae30b09ba7854629053fca0aa09bb0d16435b6aab5",
+              "size": 233636
+            },
+            {
+              "platform": "x86_64-pc-windows-msvc",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/popeye-v0.1.3/popeye-0.1.3-x86_64-pc-windows-msvc.tar.zst",
+              "blake3": "0765796572f1350972d4f70b50572e549a76a3c30e92e158ff9e0916a05a4371",
+              "size": 238005
+            },
+            {
+              "platform": "aarch64-pc-windows-msvc",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/popeye-v0.1.3/popeye-0.1.3-aarch64-pc-windows-msvc.tar.zst",
+              "blake3": "30838b91cd4cc887aae9782a360a192e584c03c4f685949ac0b0f3f2788a1d84",
+              "size": 215882
+            }
+          ]
         }
       ]
     },
@@ -802,6 +1113,68 @@
               "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/resource-summary-v0.1.1/resource-summary-0.1.1-aarch64-apple-darwin.tar.zst",
               "blake3": "bae81e7bee2460acab0bda1407a3ad2e27e979aa2c7f55687b1da2d5638b3e25",
               "size": 190780
+            }
+          ]
+        },
+        {
+          "version": "0.1.2",
+          "sofka": ">=0.27.4",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/d8d82c2a81884a7abc5db4ec071352e71ee0d619/plugins/resource-summary/README.md",
+          "requirements": [],
+          "commands": [
+            {
+              "name": "Resource summary",
+              "command": "./adapter",
+              "args": [],
+              "scopes": [],
+              "target": "selection",
+              "output": "report",
+              "mutating": false,
+              "confirm": false,
+              "dangerous": false,
+              "network_load": false,
+              "palette": "resource-summary"
+            }
+          ],
+          "source_commit": "d8d82c2a81884a7abc5db4ec071352e71ee0d619",
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "x86_64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/resource-summary-v0.1.2/resource-summary-0.1.2-x86_64-unknown-linux-gnu.tar.zst",
+              "blake3": "856cb75a6e254b87458ec4168bb40388b7af83f53895d9d8c4836ab9fc5f6ba9",
+              "size": 212748
+            },
+            {
+              "platform": "aarch64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/resource-summary-v0.1.2/resource-summary-0.1.2-aarch64-unknown-linux-gnu.tar.zst",
+              "blake3": "c8366d5fc6f385b8b5741a8e802b3a75424318a17fda4b0a3460508971d93137",
+              "size": 196638
+            },
+            {
+              "platform": "x86_64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/resource-summary-v0.1.2/resource-summary-0.1.2-x86_64-apple-darwin.tar.zst",
+              "blake3": "f41b262029d10fb46a21a7fcf7db8c489ac651448020a6f5bc0d5baa09d344b4",
+              "size": 207032
+            },
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/resource-summary-v0.1.2/resource-summary-0.1.2-aarch64-apple-darwin.tar.zst",
+              "blake3": "3dd3f0eb745d5ca48435fef72db634af419e3529b741e3323c29637f81104370",
+              "size": 190818
+            },
+            {
+              "platform": "x86_64-pc-windows-msvc",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/resource-summary-v0.1.2/resource-summary-0.1.2-x86_64-pc-windows-msvc.tar.zst",
+              "blake3": "3309f37d77bd16f3f19c30779bbf1a4f5800e5816e29c7c2dccb13fc0a79a0a5",
+              "size": 168995
+            },
+            {
+              "platform": "aarch64-pc-windows-msvc",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/resource-summary-v0.1.2/resource-summary-0.1.2-aarch64-pc-windows-msvc.tar.zst",
+              "blake3": "b29fa4ce9560294098d43683dcf170ba8535bb044ad5a30cbc9066c2ad7373cf",
+              "size": 152323
             }
           ]
         }
@@ -974,6 +1347,67 @@
               "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/trivy-v0.1.2/trivy-0.1.2-aarch64-apple-darwin.tar.zst",
               "blake3": "7a0ef45c15ff2d6f2c6c6804b27e031679d41722abdf5663f984388c2323c3b4",
               "size": 252067
+            }
+          ]
+        },
+        {
+          "version": "0.1.3",
+          "sofka": ">=0.27.4",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/d8d82c2a81884a7abc5db4ec071352e71ee0d619/plugins/trivy/README.md",
+          "requirements": [
+            {
+              "name": "trivy",
+              "install": "Install Trivy from https://trivy.dev/latest/getting-started/installation/"
+            }
+          ],
+          "commands": [
+            {
+              "name": "Trivy scan",
+              "command": "./adapter",
+              "args": [],
+              "scopes": [],
+              "target": "context",
+              "output": "report",
+              "mutating": false,
+              "confirm": false,
+              "dangerous": false,
+              "network_load": false,
+              "palette": "trivy"
+            }
+          ],
+          "source_commit": "d8d82c2a81884a7abc5db4ec071352e71ee0d619",
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "x86_64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/trivy-v0.1.3/trivy-0.1.3-x86_64-unknown-linux-gnu.tar.zst",
+              "blake3": "eb9a2cbca8075754e949eb827e2acb16d5c6b53b967823eda04b33ddedd34d53",
+              "size": 281350
+            },
+            {
+              "platform": "aarch64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/trivy-v0.1.3/trivy-0.1.3-aarch64-unknown-linux-gnu.tar.zst",
+              "blake3": "307b817b78a3bc02c5106d931881766b0943780fe9eee284df93d4fa0379e5b8",
+              "size": 263526
+            },
+            {
+              "platform": "x86_64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/trivy-v0.1.3/trivy-0.1.3-x86_64-apple-darwin.tar.zst",
+              "blake3": "7528b6523e00623a0045b5b8f363ef56745c49160313b26e747e41d2cb86db2f",
+              "size": 270020
+            },
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/trivy-v0.1.3/trivy-0.1.3-aarch64-apple-darwin.tar.zst",
+              "blake3": "d6e873a9f9c8cd509b976036269de2d9f993fd89ea907b337f81db13cad0247f",
+              "size": 252053
+            },
+            {
+              "platform": "x86_64-pc-windows-msvc",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/trivy-v0.1.3/trivy-0.1.3-x86_64-pc-windows-msvc.tar.zst",
+              "blake3": "441ccd9a073df5279602d5350cfd1dac80748f5656c3398714c1650355d42908",
+              "size": 257337
             }
           ]
         }
