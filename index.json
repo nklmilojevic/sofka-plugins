@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-15T17:37:20Z",
+  "generated_at": "2026-09-24T10:00:03Z",
   "plugins": [
     {
       "id": "cert-manager",
@@ -571,6 +571,77 @@
               "size": 215271
             }
           ]
+        },
+        {
+          "version": "0.1.4",
+          "sofka": ">=0.29.1",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/81d32f283d15d78227f1393e724d7546bdab2792/plugins/chaos-kill/README.md",
+          "requirements": [
+            {
+              "name": "kubectl",
+              "install": "Install kubectl from https://kubernetes.io/docs/tasks/tools/"
+            }
+          ],
+          "commands": [
+            {
+              "name": "Chaos kill",
+              "command": "./adapter",
+              "args": [],
+              "scopes": [
+                "deployments",
+                "statefulsets",
+                "daemonsets"
+              ],
+              "target": "selection",
+              "output": "report",
+              "mutating": true,
+              "confirm": true,
+              "dangerous": true,
+              "network_load": false,
+              "palette": "chaos-kill"
+            }
+          ],
+          "source_commit": "81d32f283d15d78227f1393e724d7546bdab2792",
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "x86_64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.4/chaos-kill-0.1.4-x86_64-unknown-linux-gnu.tar.zst",
+              "blake3": "b70276bf3b94bab22769f89a38b59a02d87f0f92b7738c6c431ac753f5c4c201",
+              "size": 260412
+            },
+            {
+              "platform": "aarch64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.4/chaos-kill-0.1.4-aarch64-unknown-linux-gnu.tar.zst",
+              "blake3": "1b450ef469846e90463a0766127d28ed0d5be7d94e459c2ee3ea91a11bbf06bb",
+              "size": 239543
+            },
+            {
+              "platform": "x86_64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.4/chaos-kill-0.1.4-x86_64-apple-darwin.tar.zst",
+              "blake3": "a6603567fcc379dcfb38f13e3d245e64a5924e1b034c9da8ce6e88b520e9ce60",
+              "size": 249095
+            },
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.4/chaos-kill-0.1.4-aarch64-apple-darwin.tar.zst",
+              "blake3": "0a9802135d4d367b1555bd920907092d1efe130960b2a40a8b434e7b7491b2fe",
+              "size": 229185
+            },
+            {
+              "platform": "x86_64-pc-windows-msvc",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.4/chaos-kill-0.1.4-x86_64-pc-windows-msvc.tar.zst",
+              "blake3": "065be94c9851a55cce7eec70016d09a447aeffceaa4ddda4a8808924d932d3fd",
+              "size": 237230
+            },
+            {
+              "platform": "aarch64-pc-windows-msvc",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/chaos-kill-v0.1.4/chaos-kill-0.1.4-aarch64-pc-windows-msvc.tar.zst",
+              "blake3": "c3e708a1394d6191b15446d866c1bd408f7eb099de0a53d3eea29b6cdcfefd2c",
+              "size": 215403
+            }
+          ]
         }
       ]
     },
@@ -811,6 +882,70 @@
               "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.3/oha-0.1.3-x86_64-pc-windows-msvc.tar.zst",
               "blake3": "8b62568891ef5fb541bb75719175b5f7956cd02eb2a0fc180f23c7d1e22e85bb",
               "size": 256010
+            }
+          ]
+        },
+        {
+          "version": "0.1.4",
+          "sofka": ">=0.29.1",
+          "license": "MIT OR Apache-2.0",
+          "readme": "https://github.com/nklmilojevic/sofka-plugins/blob/81d32f283d15d78227f1393e724d7546bdab2792/plugins/oha/README.md",
+          "requirements": [
+            {
+              "name": "oha",
+              "install": "Install oha from https://github.com/hatoo/oha#installation"
+            }
+          ],
+          "commands": [
+            {
+              "name": "HTTP benchmark",
+              "command": "./adapter",
+              "args": [],
+              "scopes": [
+                "pods",
+                "services"
+              ],
+              "target": "selection",
+              "output": "report",
+              "mutating": false,
+              "confirm": false,
+              "dangerous": false,
+              "network_load": true,
+              "palette": "oha"
+            }
+          ],
+          "source_commit": "81d32f283d15d78227f1393e724d7546bdab2792",
+          "status": "active",
+          "artifacts": [
+            {
+              "platform": "x86_64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.4/oha-0.1.4-x86_64-unknown-linux-gnu.tar.zst",
+              "blake3": "6093fadab63cbf71db64aea7da0065983c456cac7e56c233da8ca7d9f4e114ef",
+              "size": 284410
+            },
+            {
+              "platform": "aarch64-unknown-linux-gnu",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.4/oha-0.1.4-aarch64-unknown-linux-gnu.tar.zst",
+              "blake3": "1de08bc8c8786cdc247c6d7f9c0841c430b6e14df58fd0457ac125171e4d0510",
+              "size": 262207
+            },
+            {
+              "platform": "x86_64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.4/oha-0.1.4-x86_64-apple-darwin.tar.zst",
+              "blake3": "af75159f3b5583e1fa7b75a55c25ffffcb1ad4037fb785346e31f3f390a0ba3a",
+              "size": 272363
+            },
+            {
+              "platform": "aarch64-apple-darwin",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.4/oha-0.1.4-aarch64-apple-darwin.tar.zst",
+              "blake3": "3eb293f9b4dbeecaa96590257210fd3f675c88efec45096087a37bf08dcfabab",
+              "size": 248314
+            },
+            {
+              "platform": "x86_64-pc-windows-msvc",
+              "url": "https://github.com/nklmilojevic/sofka-plugins/releases/download/oha-v0.1.4/oha-0.1.4-x86_64-pc-windows-msvc.tar.zst",
+              "blake3": "9ddd310cd7cb5fdcf8aa20a7403c2a86b625c715157e83af51cf7ca86cd31f9f",
+              "size": 256085
             }
           ]
         }
