@@ -32,7 +32,7 @@ plane path — not only the selected workload.
 
 ## Dependencies
 
-Requires Sofka 0.27.2 or newer for live plugin activity.
+Requires Sofka 0.29.1 or newer for the input form and live plugin activity.
 
 oha 1.9.0 or newer, on `PATH`; that release introduced the `--output-format`
 form used for JSON reports. See the

@@ -68,7 +68,7 @@ refuses a setting that could delete every desired replica.
 
 ## Dependencies
 
-Requires Sofka 0.27.2 or newer for live plugin activity.
+Requires Sofka 0.29.1 or newer for the input form and live plugin activity.
 
 `kubectl` on `PATH`. It runs with your credentials and against the context
 sofka is showing.

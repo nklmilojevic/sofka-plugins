@@ -575,13 +575,13 @@ def validate_definition(plugin: str, definition: dict[str, object]) -> dict[str,
         check(isinstance(palette, str) and PALETTE.fullmatch(palette) is not None, f"{plugin}: palette must contain lowercase letters, digits or hyphens")
         check(palette not in RESERVED, f"{plugin}: palette command {palette!r} is reserved by sofka")
     target = definition.get("target", "selection")
-    check(target in TARGET_MODES, f"{plugin}: target must be selection or context")
-    check(definition.get("output") in OUTPUT_MODES, f"{plugin}: packages require captured output: popup, background or report")
+    check(isinstance(target, str) and target in TARGET_MODES, f"{plugin}: target must be selection or context")
+    check(isinstance(definition.get("output"), str) and definition["output"] in OUTPUT_MODES, f"{plugin}: packages require captured output: popup, background or report")
     check(definition.get("shell") is not True, f"{plugin}: packages must use an executable adapter, not shell = true")
     if "port_forward" in definition:
         check(target == "selection" and definition.get("output") == "report", f"{plugin}: port_forward requires target = selection and output = report")
     if "prompt" in definition:
-        check(definition["prompt"] in PROMPT_MODES, f"{plugin}: prompt must be missing or always")
+        check(isinstance(definition["prompt"], str) and definition["prompt"] in PROMPT_MODES, f"{plugin}: prompt must be missing or always")
     if "timeout" in definition:
         check(duration(definition["timeout"]) is not None, f"{plugin}: invalid timeout {definition['timeout']!r}")
     for field in ("args", "requires", "scopes"):
