@@ -552,8 +552,8 @@ def validate_manifest(plugin: str, manifest: dict[str, object]) -> list[dict[str
         check(isinstance(definition, dict), f"{plugin}: command must be a table")
         validate_definition(plugin, definition)
         if "prompt" in definition:
-            check(requires_supported_sofka(package["sofka"], (0, 30, 0, True)),
-                  f"{plugin}: command prompt requires sofka >=0.30.0")
+            check(requires_supported_sofka(package["sofka"], (0, 29, 1, True)),
+                  f"{plugin}: command prompt requires sofka >=0.29.1")
         for field, values in seen.items():
             if field in definition and (field != "key" or definition[field]):
                 check(definition[field] not in values, f"{plugin}: duplicate command {field}")

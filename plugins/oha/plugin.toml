@@ -8,7 +8,7 @@ license = "MIT OR Apache-2.0"
 description = "Benchmark the selected pod or service over a managed port-forward with oha."
 repository = "https://github.com/nklmilojevic/sofka-plugins"
 readme = "README.md"
-sofka = ">=0.30.0"
+sofka = ">=0.29.1"
 platforms = [
   "x86_64-unknown-linux-gnu",
   "aarch64-unknown-linux-gnu",
