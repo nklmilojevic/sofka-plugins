@@ -58,6 +58,9 @@ unchanged. Stdout remains the same JSON report with no schema change.
 | `count`   | `1`     | How many pods to delete, up to 10.                |
 | `wait`    | `120s`  | How long to wait for recovery, up to 300 seconds. |
 
+`:chaos-kill` without arguments opens a form with these inputs and their
+defaults. Change the values, then press `Enter`. Arguments skip the form:
+
 `:chaos-kill dry_run=false count=2 wait=60s`
 
 `count` must be lower than the workload's desired replica count. The adapter
@@ -65,7 +68,7 @@ refuses a setting that could delete every desired replica.
 
 ## Dependencies
 
-Requires Sofka 0.27.2 or newer for live plugin activity.
+Requires Sofka 0.29.1 or newer for the input form and live plugin activity.
 
 `kubectl` on `PATH`. It runs with your credentials and against the context
 sofka is showing.

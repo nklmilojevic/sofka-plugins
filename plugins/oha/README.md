@@ -32,7 +32,7 @@ plane path — not only the selected workload.
 
 ## Dependencies
 
-Requires Sofka 0.27.2 or newer for live plugin activity.
+Requires Sofka 0.29.1 or newer for the input form and live plugin activity.
 
 oha 1.9.0 or newer, on `PATH`; that release introduced the `--output-format`
 form used for JSON reports. See the
@@ -66,6 +66,10 @@ errors.
 | `connections` | `20`    | Concurrent connections.                   |
 | `rate`        | `100`   | Overall request limit per second.         |
 | `path`        | `/`     | Request path.                             |
+
+`:oha` without arguments opens a form with these inputs and their defaults.
+Change the values, then press `Enter` to start the benchmark. Arguments skip
+the form:
 
 `:oha port=8080 duration=30s connections=50 rate=100 path=/healthz`
 

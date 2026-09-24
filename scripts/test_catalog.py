@@ -297,9 +297,17 @@ def check_manifest_rules() -> None:
     rejects("an unknown manifest field", lambda: catalog.validate_manifest("resource-summary", manifest(sudo=True)))
     rejects("an uncaptured output mode", lambda: catalog.validate_manifest("resource-summary", manifest(output="terminal")))
     rejects("an invalid target", lambda: catalog.validate_manifest("resource-summary", manifest(target="cluster")))
+    rejects("an output list", lambda: catalog.validate_manifest("resource-summary", manifest(output=["report"])))
+    rejects("a target list", lambda: catalog.validate_manifest("resource-summary", manifest(target=["context"])))
     rejects("an empty command", lambda: catalog.validate_manifest("resource-summary", manifest(command="")))
     rejects("an unknown [package] field", lambda: catalog.validate_manifest("resource-summary", manifest(package={"surprise": 1})))
     rejects("an invalid timeout", lambda: catalog.validate_manifest("resource-summary", manifest(timeout="10w")))
+    for value in ["missing", "always"]:
+        accepts(f"prompt = {value!r}", lambda: catalog.validate_manifest("resource-summary", manifest(package={"sofka": ">=0.29.1"}, prompt=value)))
+    rejects("an unknown prompt mode", lambda: catalog.validate_manifest("resource-summary", manifest(package={"sofka": ">=0.29.1"}, prompt="never")))
+    rejects("a prompt list", lambda: catalog.validate_manifest("resource-summary", manifest(package={"sofka": ">=0.29.1"}, prompt=["always"])))
+    rejects("a prompt for a sofka without the input form", lambda: catalog.validate_manifest("resource-summary", manifest(prompt="always")))
+    rejects("a prompt for sofka 0.29.0", lambda: catalog.validate_manifest("resource-summary", manifest(package={"sofka": ">=0.29.0"}, prompt="always")))
     rejects("a port-forward without a report", lambda: catalog.validate_manifest("resource-summary", manifest(port_forward="8080", output="popup")))
     rejects("a manifest with neither palette nor key", lambda: catalog.validate_manifest("resource-summary", manifest(palette=None)))
     rejects(
