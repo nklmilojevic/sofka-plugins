@@ -67,6 +67,10 @@ errors.
 | `rate`        | `100`   | Overall request limit per second.         |
 | `path`        | `/`     | Request path.                             |
 
+`:oha` without arguments opens a form with these inputs and their defaults.
+Change the values, then press `Enter` to start the benchmark. Arguments skip
+the form:
+
 `:oha port=8080 duration=30s connections=50 rate=100 path=/healthz`
 
 ## Limitations

@@ -51,6 +51,7 @@ TARGETS = {
     "aarch64-pc-windows-msvc": "windows-11-arm",
 }
 TARGET_MODES = {"selection", "context"}
+PROMPT_MODES = {"missing", "always"}
 OUTPUT_MODES = {"popup", "background", "report"}
 FLAGS = ("mutating", "confirm", "dangerous", "network_load")
 
@@ -59,7 +60,7 @@ FLAGS = ("mutating", "confirm", "dangerous", "network_load")
 PLUGIN_FIELDS = {
     "args", "command", "confirm", "dangerous", "inputs", "install", "key",
     "mutating", "name", "network_load", "output", "palette", "port_forward",
-    "requires", "scopes", "shell", "target", "timeout",
+    "prompt", "requires", "scopes", "shell", "target", "timeout",
 }
 INPUT_FIELDS = {"choices", "default", "max", "min", "type"}
 INPUT_TYPES = {"boolean", "duration", "integer", "string"}
@@ -550,6 +551,9 @@ def validate_manifest(plugin: str, manifest: dict[str, object]) -> list[dict[str
     for definition in commands:
         check(isinstance(definition, dict), f"{plugin}: command must be a table")
         validate_definition(plugin, definition)
+        if "prompt" in definition:
+            check(requires_supported_sofka(package["sofka"], (0, 30, 0, True)),
+                  f"{plugin}: command prompt requires sofka >=0.30.0")
         for field, values in seen.items():
             if field in definition and (field != "key" or definition[field]):
                 check(definition[field] not in values, f"{plugin}: duplicate command {field}")
@@ -576,6 +580,8 @@ def validate_definition(plugin: str, definition: dict[str, object]) -> dict[str,
     check(definition.get("shell") is not True, f"{plugin}: packages must use an executable adapter, not shell = true")
     if "port_forward" in definition:
         check(target == "selection" and definition.get("output") == "report", f"{plugin}: port_forward requires target = selection and output = report")
+    if "prompt" in definition:
+        check(definition["prompt"] in PROMPT_MODES, f"{plugin}: prompt must be missing or always")
     if "timeout" in definition:
         check(duration(definition["timeout"]) is not None, f"{plugin}: invalid timeout {definition['timeout']!r}")
     for field in ("args", "requires", "scopes"):
