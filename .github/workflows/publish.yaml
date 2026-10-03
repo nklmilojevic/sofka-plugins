@@ -75,7 +75,7 @@ jobs:
         with:
           version: "0.12.19"
           python-version: "3.12"
-      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
         with:
           components: clippy, rustfmt
       - run: uv run --locked python scripts/catalog.py validate
@@ -99,7 +99,7 @@ jobs:
         with:
           version: "0.12.19"
           python-version: "3.12"
-      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
         with:
           targets: ${{ matrix.target }}
       - name: Build, test, and package adapter
