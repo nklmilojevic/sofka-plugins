@@ -4,7 +4,7 @@ version = "0.0.0"
 description = "Local tools for the Sofka plugin catalog"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-  "blake3==1.0.9",
+  "blake3==1.0.10",
   "zstandard==0.25.0",
 ]
 
