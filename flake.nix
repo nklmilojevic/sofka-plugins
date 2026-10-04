@@ -7,11 +7,13 @@
     let
       systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
+      pythonAttr = "python" + builtins.replaceStrings [ "." "\n" ] [ "" "" ] (builtins.readFile ./.python-version);
     in
     {
       devShells = forAllSystems (system:
         let
           pkgs = import nixpkgs { inherit system; };
+          python = pkgs.${pythonAttr};
           common = {
             packages = with pkgs; [
               cargo
@@ -19,13 +21,13 @@
               clippy
               rustfmt
               rust-analyzer
-              python312
+              python
               uv
               git
               jq
               nixpkgs-fmt
             ];
-            UV_PYTHON = "${pkgs.python312}/bin/python3";
+            UV_PYTHON = "${python}/bin/python3";
             UV_PYTHON_DOWNLOADS = "never";
             UV_LINK_MODE = "copy";
           } // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
