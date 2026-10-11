@@ -1596,16 +1596,24 @@ mod tests {
         std::fs::remove_dir_all(dir).unwrap();
     }
 
-    /// A fake tool on disk; the adapter never starts a shell itself.
+    /// A fake tool script on disk; the adapter never starts a shell itself.
     #[cfg(unix)]
     fn fake_tool(name: &str, script: &str) -> (std::path::PathBuf, std::path::PathBuf) {
-        use std::os::unix::fs::PermissionsExt as _;
         let dir = std::env::temp_dir().join(format!("cert-manager-{name}-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join(name);
-        std::fs::write(&path, format!("#!/bin/sh\n{script}\n")).unwrap();
-        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o755)).unwrap();
+        std::fs::write(&path, format!("{script}\n")).unwrap();
         (dir, path)
+    }
+
+    /// Run the script through /bin/sh. Tests run in parallel, and a fork in
+    /// another test can keep a write handle to a new script open. Linux then
+    /// refuses to execute that script with ETXTBSY.
+    #[cfg(unix)]
+    fn run_fake_tool(script: &std::path::Path, args: &[&str]) -> Result<String, String> {
+        let mut argv = vec![script.to_str().unwrap().to_string()];
+        argv.extend(args.iter().map(|arg| (*arg).to_string()));
+        execute_tool("/bin/sh", &argv, "")
     }
 
     #[cfg(unix)]
@@ -1615,7 +1623,7 @@ mod tests {
             "noisy",
             "head -c 2097152 /dev/zero | tr '\\0' e >&2\nprintf 'Name: web-tls\\n'",
         );
-        let output = execute_tool(tool.to_str().unwrap(), &[], "").unwrap();
+        let output = run_fake_tool(&tool, &[]).unwrap();
         assert_eq!(output, "Name: web-tls\n");
         std::fs::remove_dir_all(dir).unwrap();
     }
@@ -1624,7 +1632,7 @@ mod tests {
     #[test]
     fn a_tool_that_writes_over_the_limit_is_an_error_not_a_partial_report() {
         let (dir, tool) = fake_tool("flood", "head -c 2097152 /dev/zero | tr '\\0' e");
-        let error = execute_tool(tool.to_str().unwrap(), &[], "").unwrap_err();
+        let error = run_fake_tool(&tool, &[]).unwrap_err();
         assert!(error.contains("more than 1 MiB"), "{error}");
         std::fs::remove_dir_all(dir).unwrap();
     }
@@ -1636,8 +1644,7 @@ mod tests {
             "failing",
             "echo 'partial' \necho 'error: certificates.cert-manager.io \"web-tls\" not found' >&2\nexit 1",
         );
-        let args = vec!["renew".to_string(), "web-tls".to_string()];
-        let error = execute_tool(tool.to_str().unwrap(), &args, "").unwrap_err();
+        let error = run_fake_tool(&tool, &["renew", "web-tls"]).unwrap_err();
         assert!(error.contains("renew web-tls failed"), "{error}");
         assert!(error.contains("not found"), "{error}");
         assert!(!error.contains("partial"), "{error}");
