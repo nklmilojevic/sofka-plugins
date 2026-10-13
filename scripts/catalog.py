@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import compression.zstd
 import datetime
 import io
 import json
@@ -19,7 +20,6 @@ import tomllib
 # BLAKE3 has no standard-library implementation; the publish workflow installs
 # the pinned wheel. Sofka verifies every artifact with the same digest.
 import blake3
-import zstandard
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PLUGINS = ROOT / "plugins"
@@ -30,7 +30,10 @@ RELEASE_ROOT = "https://github.com/nklmilojevic/sofka-plugins/releases/download/
 # LICENSE-APACHE, both of which ship inside every archive.
 LICENSE = "MIT OR Apache-2.0"
 ID = re.compile(r"^[a-z0-9][a-z0-9-]*$")
-ZSTD = zstandard.ZstdCompressor(level=19, write_checksum=True)
+ZSTD_OPTIONS = {
+    compression.zstd.CompressionParameter.compression_level: 19,
+    compression.zstd.CompressionParameter.checksum_flag: 1,
+}
 U64_MAX = 2**64 - 1
 SEMVER = re.compile(
     r"(?P<major>[0-9]+)\.(?P<minor>[0-9]+)\.(?P<patch>[0-9]+)"
@@ -766,9 +769,9 @@ def package(args: argparse.Namespace) -> None:
         (binary, ADAPTER + (".exe" if args.target.endswith("-windows-msvc") else ""), 0o755),
     ]
     with output.open("wb") as raw:
-        # Level 19 at a pinned zstandard: ~20% smaller than gzip on a package
-        # this size, and sofka decompresses it two to three times faster.
-        with ZSTD.stream_writer(raw, closefd=False) as compressed:
+        # Level 19: ~20% smaller than gzip on a package this size, and sofka
+        # decompresses it two to three times faster.
+        with compression.zstd.ZstdFile(raw, "wb", options=ZSTD_OPTIONS) as compressed:
             with tarfile.open(fileobj=compressed, mode="w", format=tarfile.PAX_FORMAT) as archive:
                 for source, name, mode in files:
                     data = source.read_bytes()
