@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 import argparse
+import compression.zstd
 import copy
 import contextlib
 import io
-import zstandard
 import json
 import pathlib
 import re
@@ -540,7 +540,7 @@ def check_packaging() -> None:
         for platform in ("x86_64-pc-windows-msvc", "aarch64-pc-windows-msvc"):
             target = out / f"{platform}.tar.zst"
             catalog.package(argparse.Namespace(plugin="resource-summary", target=platform, binary=str(binary), output=str(target)))
-            data = zstandard.ZstdDecompressor().decompress(target.read_bytes(), max_output_size=64 << 20)
+            data = compression.zstd.decompress(target.read_bytes())
             with tarfile.open(fileobj=io.BytesIO(data)) as archive:
                 if "adapter.exe" not in archive.getnames() or "adapter" in archive.getnames():
                     FAILURES.append(f"{platform}: incorrect executable filename")
@@ -549,7 +549,7 @@ def check_packaging() -> None:
                 if archive.extractfile("plugin.toml").read() != MANIFEST.read_bytes():
                     FAILURES.append(f"{platform}: changed source manifest")
 
-        with tarfile.open(fileobj=io.BytesIO(zstandard.ZstdDecompressor().decompress(built[0], max_output_size=64 << 20))) as archive:
+        with tarfile.open(fileobj=io.BytesIO(compression.zstd.decompress(built[0]))) as archive:
             members = {member.name: member for member in archive.getmembers()}
         expected = {
             "plugin.toml": 0o644,

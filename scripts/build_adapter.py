@@ -1,7 +1,7 @@
 """Build and check a native plugin package without external tools or a cluster."""
 
 import argparse
-import io
+import compression.zstd
 import json
 import os
 from pathlib import Path
@@ -10,7 +10,6 @@ import tarfile
 import tempfile
 
 import catalog
-import zstandard
 
 
 def test_adapter(binary: Path, plugin: str) -> None:
@@ -51,9 +50,8 @@ def main() -> None:
     package = catalog.ROOT / f"{args.plugin}-{version}-{args.target}.tar.zst"
     catalog.package(argparse.Namespace(plugin=args.plugin, target=args.target, binary=str(binary), output=str(package)))
     with tempfile.TemporaryDirectory() as temporary:
-        with zstandard.ZstdDecompressor().stream_reader(package.open("rb")) as source:
-            with tarfile.open(fileobj=io.BytesIO(source.read())) as archive:
-                archive.extractall(temporary, filter="data")
+        with tarfile.open(package, "r:zst") as archive:
+            archive.extractall(temporary, filter="data")
         staged = Path(temporary)
         adapter = staged / (catalog.ADAPTER + suffix)
         if adapter.read_bytes() != binary.read_bytes():
