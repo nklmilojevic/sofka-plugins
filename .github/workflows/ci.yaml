@@ -23,7 +23,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
-          version: "0.13.5"
+          version: "0.13.6"
       - id: changes
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
@@ -43,7 +43,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
-          version: "0.13.5"
+          version: "0.13.6"
       - name: Validate catalog and sources
         run: uv run --locked python scripts/catalog.py validate
       - name: Test catalog validation
@@ -87,7 +87,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
-          version: "0.13.5"
+          version: "0.13.6"
       - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
           targets: ${{ matrix.target }}
